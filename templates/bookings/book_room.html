@@ -1,0 +1,154 @@
+{% extends 'base.html' %}
+{% block title %}Book {{ room.name }} — LuxeStay{% endblock %}
+
+{% block extra_css %}
+<style>
+    .booking-summary { background: var(--dark); color: white; padding: 2rem; border-top: 3px solid var(--gold); position: sticky; top: 80px; }
+    .booking-summary h4 { font-family: 'Playfair Display', serif; }
+    .summary-row { display: flex; justify-content: space-between; padding: 0.5rem 0; border-bottom: 1px solid #333; font-size: 0.9rem; }
+    .summary-row:last-child { border-bottom: none; }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="page-header">
+    <div class="container">
+        <h2>Complete Your Booking</h2>
+        <p class="filter-panel-title mb-0">{{ hotel.name }} — {{ room.name }}</p>
+    </div>
+</div>
+
+<div class="container my-5">
+    <div class="row g-5">
+        <div class="col-lg-7">
+            <form method="post">
+                {% csrf_token %}
+
+                <div class="p-4 mb-4" style="border:1px solid #eee; border-top:3px solid var(--gold);">
+                    <h5 class="mb-4" style="font-family:'Playfair Display',serif;"><i class="bi bi-calendar3 me-2 text-gold"></i>Dates</h5>
+                    <div class="row g-3">
+                        <div class="col-md-6">
+                            <label class="form-label small filter-panel-title">Check-in Date</label>
+                            {{ form.check_in }}
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label small filter-panel-title">Check-out Date</label>
+                            {{ form.check_out }}
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label small filter-panel-title">Number of Guests</label>
+                            {{ form.guests }}
+                            <small class="filter-panel-title">Max {{ room.capacity }} guests</small>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="p-4 mb-4" style="border:1px solid #eee; border-top:3px solid var(--gold);">
+                    <h5 class="mb-4" style="font-family:'Playfair Display',serif;"><i class="bi bi-person me-2 text-gold"></i>Guest Details</h5>
+                    <div class="row g-3">
+                        <div class="col-md-6">
+                            <label class="form-label small filter-panel-title">First Name</label>
+                            {{ form.first_name }}
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label small filter-panel-title">Last Name</label>
+                            {{ form.last_name }}
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label small filter-panel-title">Email</label>
+                            {{ form.email }}
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label small filter-panel-title">Phone</label>
+                            {{ form.phone }}
+                        </div>
+                        <div class="col-12">
+                            <label class="form-label small filter-panel-title">Special Requests</label>
+                            {{ form.special_requests }}
+                        </div>
+                    </div>
+                </div>
+
+                {% if form.errors %}
+                <div class="alert alert-danger">{{ form.errors }}</div>
+                {% endif %}
+
+                <div class="p-4" style="background:#f9f9f9; border-top:3px solid var(--gold);">
+                    <div class="d-flex align-items-center gap-2 mb-3">
+                        <i class="bi bi-shield-check text-gold fs-5"></i>
+                        <span class="small filter-panel-title">Your booking is secured with 256-bit SSL encryption</span>
+                    </div>
+                    <button type="submit" class="btn btn-gold w-100 py-3 fs-6">
+                        <i class="bi bi-check-circle me-2"></i>Confirm Booking
+                    </button>
+                </div>
+            </form>
+        </div>
+
+        <!-- SUMMARY SIDEBAR -->
+        <div class="col-lg-5">
+            <div class="booking-summary">
+                <h4 class="mb-3">Booking Summary</h4>
+                {% if room.image %}
+                <img src="{{ room.image.url }}" alt="{{ room.name }}" class="w-100 mb-3" style="height:160px; object-fit:cover;">
+                {% else %}
+                <img src="https://images.unsplash.com/photo-1631049307264-da0ec9d70304?w=400" alt="{{ room.name }}" class="w-100 mb-3" style="height:160px; object-fit:cover;">
+                {% endif %}
+                <div class="summary-row">
+                    <span class="filter-panel-title">Hotel</span>
+                    <span>{{ hotel.name }}</span>
+                </div>
+                <div class="summary-row">
+                    <span class="filter-panel-title">Room</span>
+                    <span>{{ room.name }}</span>
+                </div>
+                <div class="summary-row">
+                    <span class="filter-panel-title">Room Number</span>
+                    <span>{{ room.room_number }}</span>
+                </div>
+                <div class="summary-row">
+                    <span class="filter-panel-title">Bed Type</span>
+                    <span>{{ room.bed_type }}</span>
+                </div>
+                <div class="summary-row">
+                    <span class="filter-panel-title">Max Guests</span>
+                    <span>{{ room.capacity }}</span>
+                </div>
+                <div class="summary-row mt-2">
+                    <span class="filter-panel-title">Price per night</span>
+                    <span class="text-gold">${{ room.price_per_night }}</span>
+                </div>
+                <div class="mt-3 pt-3 border-top border-secondary">
+                    <div class="d-flex justify-content-between">
+                        <span>Total</span>
+                        <span style="font-family:'Playfair Display',serif; font-size:1.5rem; color:var(--gold);" id="totalPrice">—</span>
+                    </div>
+                    <small class="filter-panel-title">Calculated based on selected dates</small>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+const price = {{ room.price_per_night }};
+const ci = document.querySelector('input[name=check_in]');
+const co = document.querySelector('input[name=check_out]');
+const total = document.getElementById('totalPrice');
+
+function updateTotal() {
+    if (ci.value && co.value) {
+        const d = (new Date(co.value) - new Date(ci.value)) / 86400000;
+        if (d > 0) {
+            total.textContent = '$' + (d * price).toFixed(2);
+        } else {
+            total.textContent = '—';
+        }
+    }
+}
+ci.addEventListener('change', updateTotal);
+co.addEventListener('change', updateTotal);
+</script>
+{% endblock %}

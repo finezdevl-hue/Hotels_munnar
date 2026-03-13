@@ -1,0 +1,52 @@
+{% extends 'employees/base.html' %}
+{% block title %}Bookings{% endblock %}
+{% block topbar_title %}Bookings{% endblock %}
+{% block nav_bookings %}active{% endblock %}
+
+{% block content %}
+<div class="sp-page-head">
+  <div><h2>Bookings</h2><p>{{ hotel.name }} · {{ bookings.paginator.count }} total</p></div>
+</div>
+
+<!-- FILTERS -->
+<div class="sp-panel sp-panel-body mb-3">
+  <form method="get" style="display:flex;gap:.75rem;flex-wrap:wrap;align-items:flex-end;">
+    <div><label class="sp-label">Search</label><input type="text" name="q" value="{{ request.GET.q }}" class="sp-input" placeholder="Guest name, email…" style="width:210px;"></div>
+    <div><label class="sp-label">Status</label>
+      <select name="status" class="sp-select" style="width:140px;">
+        <option value="">All</option>
+        {% for val,label in status_choices %}<option value="{{ val }}" {% if current_status == val %}selected{% endif %}>{{ label }}</option>{% endfor %}
+      </select>
+    </div>
+    <button type="submit" class="sp-btn sb-primary">Filter</button>
+    <a href="{% url 'employee_bookings' %}" class="sp-btn sb-ghost">Reset</a>
+  </form>
+</div>
+
+<div class="sp-table-wrap">
+  <table class="sp-table">
+    <thead><tr><th>Ref</th><th>Guest</th><th>Room</th><th>Check In → Out</th><th>Total</th><th>Status</th>{% if emp.can_manage_bookings %}<th></th>{% endif %}</tr></thead>
+    <tbody>
+      {% for b in bookings %}
+      <tr>
+        <td><code style="color:var(--gold);font-size:.7rem;background:var(--bg3);padding:.12rem .4rem;border-radius:var(--r1);">{{ b.booking_ref_short }}</code></td>
+        <td><div style="font-weight:500;font-size:.82rem;color:var(--ink);">{{ b.first_name }} {{ b.last_name }}</div><div style="font-size:.7rem;color:var(--ink3);">{{ b.email }}</div></td>
+        <td style="font-size:.8rem;">{{ b.room.name }}</td>
+        <td style="font-size:.76rem;color:var(--ink3);">{{ b.check_in }} → {{ b.check_out }}</td>
+        <td style="color:var(--gold);font-weight:600;">${{ b.total_price }}</td>
+        <td><span class="sp-badge s-{{ b.status }}">{{ b.get_status_display }}</span></td>
+        {% if emp.can_manage_bookings %}<td><a href="{% url 'employee_booking_detail' b.pk %}" class="sp-btn sb-ghost" style="padding:.28rem .55rem;font-size:.68rem;"><i class="bi bi-pencil"></i></a></td>{% endif %}
+      </tr>
+      {% empty %}
+      <tr><td colspan="7" style="text-align:center;padding:3rem;color:var(--ink3);"><i class="bi bi-calendar-x" style="font-size:2rem;display:block;margin-bottom:.5rem;"></i>No bookings found</td></tr>
+      {% endfor %}
+    </tbody>
+  </table>
+  {% if bookings.has_other_pages %}
+  <div style="padding:.75rem 1.4rem;border-top:1px solid rgba(255,255,255,.05);display:flex;gap:.5rem;">
+    {% if bookings.has_previous %}<a href="?page={{ bookings.previous_page_number }}" class="sp-btn sb-ghost" style="font-size:.68rem;padding:.3rem .7rem;">← Prev</a>{% endif %}
+    {% if bookings.has_next %}<a href="?page={{ bookings.next_page_number }}" class="sp-btn sb-ghost" style="font-size:.68rem;padding:.3rem .7rem;">Next →</a>{% endif %}
+  </div>
+  {% endif %}
+</div>
+{% endblock %}

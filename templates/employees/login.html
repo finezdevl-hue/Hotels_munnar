@@ -1,0 +1,70 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1.0">
+  <title>Staff Login — LuxeStay</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@400;600;700&family=Outfit:wght@300;400;500;600&display=swap" rel="stylesheet">
+  <style>
+    :root{--gold:#C9A84C;--gold-lt:#E8C96A;--gold-bg:rgba(201,168,76,.10);--gold-bd:rgba(201,168,76,.28);--bg0:#060608;--bg1:#0D0D0F;--bg2:#141418;--bg3:#1C1C22;--ink:#F0EBE0;--ink2:#BFB8AC;--ink3:#6E6860;--bad:#B85050;--r1:3px;--r2:7px;--r3:12px;}
+    *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+    body{font-family:'Outfit',sans-serif;background:var(--bg0);color:var(--ink2);min-height:100vh;display:flex;align-items:center;justify-content:center;-webkit-font-smoothing:antialiased;padding:2rem;position:relative;overflow:hidden;}
+    body::before{content:'';position:absolute;top:-30%;right:-15%;width:600px;height:600px;background:radial-gradient(circle,rgba(201,168,76,.05) 0%,transparent 65%);pointer-events:none;}
+    .login-card{width:100%;max-width:420px;background:var(--bg2);border:1px solid rgba(201,168,76,.15);border-radius:var(--r3);overflow:hidden;box-shadow:0 24px 80px rgba(0,0,0,.65);animation:fadeUp .5s ease both;}
+    @keyframes fadeUp{from{opacity:0;transform:translateY(24px)}to{opacity:1;transform:none}}
+    .card-head{background:linear-gradient(160deg,var(--bg3),var(--bg0));border-bottom:1px solid rgba(201,168,76,.1);padding:2.25rem 2.25rem 1.75rem;text-align:center;}
+    .card-brand{font-family:'Cormorant Garamond',serif;font-size:1.5rem;letter-spacing:5px;color:var(--gold);display:block;margin-bottom:.2rem;}
+    .card-sub{font-size:.62rem;letter-spacing:3px;text-transform:uppercase;color:var(--ink3);}
+    .card-body{padding:2rem 2.25rem 2.25rem;}
+    .sp-label{font-size:.62rem;letter-spacing:1.5px;text-transform:uppercase;color:var(--ink3);font-weight:600;margin-bottom:.4rem;display:block;}
+    .sp-input{background:var(--bg3);border:1px solid rgba(255,255,255,.08);color:var(--ink);border-radius:var(--r1);padding:.65rem .9rem;font-family:'Outfit',sans-serif;font-size:.88rem;width:100%;outline:none;transition:border-color .15s;}
+    .sp-input:focus{border-color:var(--gold);box-shadow:0 0 0 3px var(--gold-bg);}
+    .sp-input::placeholder{color:var(--ink3);}
+    .sp-btn{display:block;width:100%;font-family:'Outfit',sans-serif;font-size:.72rem;font-weight:600;letter-spacing:2.5px;text-transform:uppercase;padding:.85rem;border:none;border-radius:var(--r1);cursor:pointer;transition:all .15s;background:var(--gold);color:#000;}
+    .sp-btn:hover{background:var(--gold-lt);}
+    .alert{border-radius:var(--r2);padding:.8rem 1rem;font-size:.83rem;display:flex;align-items:center;gap:.6rem;background:rgba(184,80,80,.08);border:1px solid rgba(184,80,80,.25);color:#d88;margin-bottom:1rem;}
+    .back-link{text-align:center;margin-top:1.25rem;font-size:.8rem;color:var(--ink3);}
+    .back-link a{color:var(--gold);}
+    .info-box{background:var(--gold-bg);border:1px solid var(--gold-bd);border-radius:var(--r2);padding:.85rem 1rem;font-size:.78rem;color:var(--ink2);display:flex;gap:.6rem;align-items:flex-start;margin-bottom:1.25rem;}
+    .info-box i{color:var(--gold);flex-shrink:0;margin-top:1px;}
+  </style>
+</head>
+<body>
+  <div class="login-card">
+    <div class="card-head">
+      <span class="card-brand">LUXESTAY</span>
+      <span class="card-sub">Staff Portal</span>
+      <h4 style="font-family:'Cormorant Garamond',serif;color:var(--ink);margin-top:1rem;font-size:1.4rem;">Employee Sign In</h4>
+      <p style="color:var(--ink3);font-size:.82rem;margin:.25rem 0 0;">Access your hotel dashboard</p>
+    </div>
+    <div class="card-body">
+      {% if messages %}
+        {% for m in messages %}
+        <div class="alert"><i class="bi bi-exclamation-circle"></i>{{ m }}</div>
+        {% endfor %}
+      {% endif %}
+      <div class="info-box">
+        <i class="bi bi-info-circle"></i>
+        <span>This portal is for hotel staff only. Your login credentials are provided by your hotel manager.</span>
+      </div>
+      <form method="post">
+        {% csrf_token %}
+        <div style="margin-bottom:1rem;">
+          <label class="sp-label">Username</label>
+          <input type="text" name="username" class="sp-input" placeholder="Enter your username" autofocus required>
+        </div>
+        <div style="margin-bottom:1.5rem;">
+          <label class="sp-label">Password</label>
+          <input type="password" name="password" class="sp-input" placeholder="Enter your password" required>
+        </div>
+        <button type="submit" class="sp-btn">Sign In to Staff Portal</button>
+      </form>
+      <div class="back-link">
+        <a href="{% url 'home' %}">← Back to LuxeStay</a>
+      </div>
+    </div>
+  </div>
+</body>
+</html>

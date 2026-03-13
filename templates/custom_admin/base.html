@@ -1,0 +1,215 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1.0">
+  <title>{% block title %}LuxeStay Admin{% endblock %}</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@400;600;700&family=Outfit:wght@300;400;500;600&display=swap" rel="stylesheet">
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+  <style>
+    :root {
+      --gold:#C9A84C; --gold-lt:#E8C96A; --gold-dk:#8a6f2e;
+      --gold-bg:rgba(201,168,76,.10); --gold-bd:rgba(201,168,76,.28);
+      --bg0:#060608; --bg1:#0D0D0F; --bg2:#141418; --bg3:#1C1C22; --bg4:#232329;
+      --ink:#F0EBE0; --ink2:#BFB8AC; --ink3:#6E6860;
+      --ok:#4FA87A; --warn:#D4933C; --bad:#B85050; --info:#4A86C0;
+      --r1:3px; --r2:7px; --r3:12px;
+      --sh-s:0 2px 16px rgba(0,0,0,.4); --sh-m:0 8px 48px rgba(0,0,0,.6); --sh-g:0 0 40px rgba(201,168,76,.12);
+      --sidebar:256px;
+    }
+    *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+    body{font-family:'Outfit',sans-serif;background:var(--bg0);color:var(--ink2);min-height:100vh;display:flex;-webkit-font-smoothing:antialiased;}
+    ::-webkit-scrollbar{width:4px}::-webkit-scrollbar-track{background:var(--bg0)}::-webkit-scrollbar-thumb{background:var(--bg4);border-radius:2px}
+    a{color:var(--gold);text-decoration:none;transition:color .15s}a:hover{color:var(--gold-lt)}
+    ::selection{background:var(--gold-bg);color:var(--gold-lt)}
+
+    /* SIDEBAR */
+    .adm-sidebar{
+      width:var(--sidebar);min-height:100vh;
+      background:var(--bg1);border-right:1px solid rgba(255,255,255,.05);
+      display:flex;flex-direction:column;position:fixed;left:0;top:0;bottom:0;z-index:100;
+      transition:transform .3s;
+    }
+    .adm-logo{padding:1.5rem 1.5rem 1rem;border-bottom:1px solid rgba(255,255,255,.05);}
+    .adm-logo-text{font-family:'Cormorant Garamond',serif;font-size:1.35rem;font-weight:700;color:var(--gold);letter-spacing:4px;line-height:1;}
+    .adm-logo-sub{font-size:.6rem;letter-spacing:3.5px;text-transform:uppercase;color:var(--ink3);display:block;margin-top:3px;}
+    .adm-nav{flex:1;padding:.75rem 0;overflow-y:auto;}
+    .adm-nav-label{font-size:.58rem;letter-spacing:3px;text-transform:uppercase;color:var(--ink3);padding:.7rem 1.5rem .35rem;font-weight:600;}
+    .adm-nav-item{display:flex;align-items:center;gap:.7rem;padding:.6rem 1.5rem;color:var(--ink3);font-size:.82rem;font-weight:400;border-left:2px solid transparent;transition:all .15s;position:relative;}
+    .adm-nav-item:hover{color:var(--ink2);background:rgba(255,255,255,.02);border-left-color:var(--gold-dk);}
+    .adm-nav-item.active{color:var(--gold);background:var(--gold-bg);border-left-color:var(--gold);font-weight:500;}
+    .adm-nav-item i{font-size:.95rem;width:18px;text-align:center;}
+    .adm-badge{margin-left:auto;background:var(--bad);color:#fff;font-size:.6rem;padding:2px 6px;border-radius:20px;font-weight:600;}
+    .adm-footer{padding:1rem 1.5rem;border-top:1px solid rgba(255,255,255,.05);}
+    .adm-avatar-sm{width:32px;height:32px;border-radius:50%;background:var(--gold-bg);border:1px solid var(--gold-bd);display:flex;align-items:center;justify-content:center;font-family:'Cormorant Garamond',serif;font-size:.9rem;color:var(--gold);}
+
+    /* MAIN */
+    .adm-main{margin-left:var(--sidebar);flex:1;display:flex;flex-direction:column;min-height:100vh;}
+    .adm-topbar{height:58px;background:var(--bg1);border-bottom:1px solid rgba(255,255,255,.05);display:flex;align-items:center;padding:0 2rem;position:sticky;top:0;z-index:50;gap:1rem;}
+    .adm-topbar-title{font-family:'Cormorant Garamond',serif;font-size:1.15rem;color:var(--ink);}
+    .adm-body{padding:2rem;flex:1;}
+
+    /* STAT CARDS */
+    .adm-stat{background:var(--bg2);border:1px solid rgba(255,255,255,.055);border-radius:var(--r3);padding:1.5rem;position:relative;overflow:hidden;transition:border-color .2s,transform .2s;}
+    .adm-stat:hover{border-color:var(--gold-bd);transform:translateY(-2px);}
+    .adm-stat::before{content:'';position:absolute;top:0;right:0;width:90px;height:90px;border-radius:50%;opacity:.06;transform:translate(20px,-20px);}
+    .adm-stat.c-gold::before{background:var(--gold)} .adm-stat.c-ok::before{background:var(--ok)} .adm-stat.c-info::before{background:var(--info)} .adm-stat.c-bad::before{background:var(--bad)}
+    .adm-stat-icon{width:42px;height:42px;border-radius:var(--r2);display:flex;align-items:center;justify-content:center;font-size:1.1rem;margin-bottom:.9rem;}
+    .adm-stat-icon.c-gold{background:var(--gold-bg);color:var(--gold)} .adm-stat-icon.c-ok{background:rgba(79,168,122,.1);color:var(--ok)} .adm-stat-icon.c-info{background:rgba(74,134,192,.1);color:var(--info)} .adm-stat-icon.c-bad{background:rgba(184,80,80,.1);color:var(--bad)} .adm-stat-icon.c-warn{background:rgba(212,147,60,.1);color:var(--warn)}
+    .adm-stat-val{font-family:'Cormorant Garamond',serif;font-size:2.2rem;font-weight:700;line-height:1;color:var(--ink);}
+    .adm-stat-lbl{font-size:.68rem;letter-spacing:1.5px;text-transform:uppercase;color:var(--ink3);margin-top:.3rem;}
+    .adm-stat-sub{font-size:.72rem;margin-top:.4rem;color:var(--ok);}
+
+    /* TABLE */
+    .adm-table-wrap{background:var(--bg2);border:1px solid rgba(255,255,255,.055);border-radius:var(--r3);overflow:hidden;}
+    .adm-table-head{padding:1.1rem 1.5rem;border-bottom:1px solid rgba(255,255,255,.05);display:flex;align-items:center;justify-content:space-between;}
+    .adm-table-head h6{font-family:'Cormorant Garamond',serif;font-size:1.05rem;color:var(--ink);}
+    .adm-table{width:100%;border-collapse:collapse;font-size:.83rem;}
+    .adm-table th{padding:.7rem 1.5rem;text-align:left;font-size:.6rem;letter-spacing:2px;text-transform:uppercase;color:var(--ink3);background:rgba(255,255,255,.02);border-bottom:1px solid rgba(255,255,255,.05);}
+    .adm-table td{padding:.9rem 1.5rem;border-bottom:1px solid rgba(255,255,255,.04);color:var(--ink2);vertical-align:middle;}
+    .adm-table tr:last-child td{border-bottom:none;}
+    .adm-table tr:hover td{background:rgba(201,168,76,.02);}
+
+    /* BADGES */
+    .adm-badge-status{padding:.28em .75em;border-radius:var(--r1);font-size:.62rem;font-weight:600;letter-spacing:1px;text-transform:uppercase;}
+    .s-confirmed{background:rgba(201,168,76,.12);color:var(--gold)} .s-pending{background:rgba(212,147,60,.12);color:var(--warn)} .s-cancelled{background:rgba(184,80,80,.12);color:#d88} .s-checked_in{background:rgba(74,134,192,.12);color:#80b8e8} .s-checked_out{background:rgba(255,255,255,.05);color:var(--ink3)} .s-approved{background:rgba(79,168,122,.12);color:var(--ok)} .s-rejected{background:rgba(184,80,80,.12);color:#d88} .s-active{background:var(--gold-bg);color:var(--gold)} .s-not_requested{background:rgba(255,255,255,.05);color:var(--ink3)}
+
+    /* BUTTONS */
+    .adm-btn{display:inline-flex;align-items:center;gap:.4rem;font-family:'Outfit',sans-serif;font-size:.7rem;font-weight:600;letter-spacing:1.5px;text-transform:uppercase;padding:.5rem 1.1rem;border:none;border-radius:var(--r1);cursor:pointer;transition:all .15s;text-decoration:none;}
+    .adm-btn-gold{background:var(--gold);color:#000 !important;} .adm-btn-gold:hover{background:var(--gold-lt);}
+    .adm-btn-ghost{background:transparent;color:var(--ink3) !important;border:1px solid rgba(255,255,255,.08);} .adm-btn-ghost:hover{border-color:var(--gold-bd);color:var(--ink2) !important;}
+    .adm-btn-ok{background:transparent;color:var(--ok) !important;border:1px solid rgba(79,168,122,.25);} .adm-btn-ok:hover{background:rgba(79,168,122,.1);}
+    .adm-btn-bad{background:transparent;color:#d88 !important;border:1px solid rgba(184,80,80,.25);} .adm-btn-bad:hover{background:rgba(184,80,80,.1);}
+
+    /* INPUTS */
+    .adm-input,.adm-select,.adm-textarea{background:var(--bg3);border:1px solid rgba(255,255,255,.07);color:var(--ink);border-radius:var(--r1);padding:.6rem .9rem;font-family:'Outfit',sans-serif;font-size:.84rem;width:100%;outline:none;transition:border-color .15s;}
+    .adm-input:focus,.adm-select:focus,.adm-textarea:focus{border-color:var(--gold);box-shadow:0 0 0 3px var(--gold-bg);}
+    .adm-input::placeholder,.adm-textarea::placeholder{color:var(--ink3);}
+    .adm-select option{background:var(--bg3);}
+    .adm-label{font-size:.62rem;letter-spacing:1.5px;text-transform:uppercase;color:var(--ink3);font-weight:600;margin-bottom:.4rem;display:block;}
+
+    /* PANEL */
+    .adm-panel{background:var(--bg2);border:1px solid rgba(255,255,255,.055);border-radius:var(--r3);overflow:hidden;}
+    .adm-panel-gold{border-top:2px solid var(--gold);}
+    .adm-panel-body{padding:1.5rem;}
+    .adm-panel-title{font-family:'Cormorant Garamond',serif;font-size:1rem;color:var(--ink);margin-bottom:1.25rem;padding-bottom:.75rem;border-bottom:1px solid rgba(255,255,255,.05);}
+
+    /* ALERTS */
+    .adm-alert{border-radius:var(--r2);padding:.85rem 1.25rem;margin-bottom:.75rem;font-size:.84rem;display:flex;align-items:center;gap:.7rem;border:1px solid;}
+    .adm-alert-ok{background:rgba(79,168,122,.08);border-color:rgba(79,168,122,.25);color:#80cfa0}
+    .adm-alert-bad{background:rgba(184,80,80,.08);border-color:rgba(184,80,80,.25);color:#d88}
+    .adm-alert-warn{background:rgba(212,147,60,.08);border-color:rgba(212,147,60,.25);color:#e0b060}
+
+    /* CHARTS */
+    .adm-chart-box{background:var(--bg2);border:1px solid rgba(255,255,255,.055);border-radius:var(--r3);padding:1.5rem;}
+    .adm-chart-box h6{font-family:'Cormorant Garamond',serif;font-size:1.05rem;color:var(--ink);margin-bottom:1.25rem;}
+
+    /* ACTIVITY */
+    .adm-activity-item{display:flex;gap:.9rem;padding:.85rem 1.5rem;border-bottom:1px solid rgba(255,255,255,.04);align-items:flex-start;font-size:.81rem;}
+    .adm-activity-item:last-child{border-bottom:none;}
+    .adm-dot{width:7px;height:7px;border-radius:50%;margin-top:5px;flex-shrink:0;}
+
+    /* PAGE HEADER */
+    .adm-page-head{margin-bottom:1.75rem;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:1rem;}
+    .adm-page-head h2{font-family:'Cormorant Garamond',serif;font-size:1.75rem;color:var(--ink);}
+    .adm-page-head p{color:var(--ink3);font-size:.82rem;margin-top:2px;}
+
+    /* MOBILE */
+    .adm-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.65);z-index:99;}
+    .adm-overlay.show{display:block;}
+    @media(max-width:992px){
+      .adm-sidebar{transform:translateX(-100%);}
+      .adm-sidebar.open{transform:translateX(0);}
+      .adm-main{margin-left:0;}
+    }
+  </style>
+  {% block extra_css %}{% endblock %}
+</head>
+<body>
+
+<div class="adm-overlay" id="admOverlay" onclick="toggleSidebar()"></div>
+
+<aside class="adm-sidebar" id="admSidebar">
+  <div class="adm-logo">
+    <div class="adm-logo-text">LUXESTAY</div>
+    <span class="adm-logo-sub">Admin Console</span>
+  </div>
+  <nav class="adm-nav">
+    <div class="adm-nav-label">Overview</div>
+    <a href="{% url 'admin_dashboard' %}" class="adm-nav-item {% block nav_dash %}{% endblock %}"><i class="bi bi-grid-1x2"></i>Dashboard</a>
+    <div class="adm-nav-label">Hotels</div>
+    <a href="{% url 'admin_hotels' %}" class="adm-nav-item {% block nav_hotels %}{% endblock %}"><i class="bi bi-building"></i>All Hotels</a>
+    <a href="{% url 'admin_hotel_create' %}" class="adm-nav-item {% block nav_hotel_create %}{% endblock %}"><i class="bi bi-plus-square"></i>Add Hotel</a>
+    <div class="adm-nav-label">Bookings</div>
+    <a href="{% url 'admin_bookings' %}" class="adm-nav-item {% block nav_bookings %}{% endblock %}"><i class="bi bi-calendar-check"></i>All Bookings</a>
+    <div class="adm-nav-label">Users</div>
+    <a href="{% url 'admin_users' %}" class="adm-nav-item {% block nav_users %}{% endblock %}"><i class="bi bi-people"></i>All Users</a>
+    <a href="{% url 'owner_approval_list' %}" class="adm-nav-item {% block nav_approvals %}{% endblock %}">
+      <i class="bi bi-person-check"></i>Owner Approvals
+      {% if pending_approvals_count %}<span class="adm-badge">{{ pending_approvals_count }}</span>{% endif %}
+    </a>
+    <div class="adm-nav-label">Content</div>
+    <a href="{% url 'admin_reviews' %}" class="adm-nav-item {% block nav_reviews %}{% endblock %}"><i class="bi bi-star"></i>Reviews</a>
+    <a href="{% url 'admin_amenities' %}" class="adm-nav-item {% block nav_amenities %}{% endblock %}"><i class="bi bi-tags"></i>Amenities</a>
+    <div class="adm-nav-label">System</div>
+    <a href="/admin/" class="adm-nav-item" target="_blank"><i class="bi bi-shield-lock"></i>Django Admin</a>
+    <a href="{% url 'home' %}" class="adm-nav-item" target="_blank"><i class="bi bi-box-arrow-up-right"></i>View Site</a>
+  </nav>
+  <div class="adm-footer">
+    <div class="d-flex align-items-center gap-2">
+      <div class="adm-avatar-sm">{{ request.user.first_name.0|default:request.user.username.0|upper }}</div>
+      <div style="flex:1;min-width:0;">
+        <div style="font-size:.8rem;font-weight:500;color:var(--ink);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">{{ request.user.get_full_name|default:request.user.username }}</div>
+        <div style="font-size:.68rem;color:var(--ink3);">Administrator</div>
+      </div>
+      <a href="{% url 'logout' %}" style="color:var(--ink3);font-size:.95rem;" title="Sign out"><i class="bi bi-box-arrow-right"></i></a>
+    </div>
+  </div>
+</aside>
+
+<div class="adm-main">
+  <header class="adm-topbar">
+    <button onclick="toggleSidebar()" style="background:transparent;border:1px solid rgba(255,255,255,.08);border-radius:var(--r1);padding:.35rem .55rem;color:var(--ink2);cursor:pointer;display:none;" id="sidebarToggle"><i class="bi bi-list" style="font-size:1.2rem;"></i></button>
+    <span class="adm-topbar-title">{% block topbar_title %}Dashboard{% endblock %}</span>
+    <div class="ms-auto d-flex align-items-center gap-3">
+      {% if pending_approvals_count %}
+      <a href="{% url 'owner_approval_list' %}" style="color:var(--warn);font-size:.8rem;display:flex;align-items:center;gap:.4rem;">
+        <i class="bi bi-bell-fill"></i>{{ pending_approvals_count }} pending
+      </a>
+      {% endif %}
+      <a href="{% url 'home' %}" class="adm-btn adm-btn-ghost" style="font-size:.68rem;padding:.35rem .85rem;" target="_blank"><i class="bi bi-eye"></i>View Site</a>
+    </div>
+  </header>
+
+  {% if messages %}
+  <div style="padding:1rem 2rem 0;">
+    {% for m in messages %}
+    <div class="adm-alert {% if m.tags == 'success' %}adm-alert-ok{% elif m.tags == 'error' %}adm-alert-bad{% else %}adm-alert-warn{% endif %}">
+      <i class="bi bi-{% if m.tags == 'success' %}check-circle{% else %}exclamation-circle{% endif %}"></i>{{ m }}
+    </div>
+    {% endfor %}
+  </div>
+  {% endif %}
+
+  <div class="adm-body">{% block content %}{% endblock %}</div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+<script>
+function toggleSidebar(){
+  document.getElementById('admSidebar').classList.toggle('open');
+  document.getElementById('admOverlay').classList.toggle('show');
+}
+// Show toggle button on mobile
+if(window.innerWidth<=992) document.getElementById('sidebarToggle').style.display='flex';
+window.addEventListener('resize',()=>{
+  const t=document.getElementById('sidebarToggle');
+  if(t) t.style.display=window.innerWidth<=992?'flex':'none';
+});
+</script>
+{% block extra_js %}{% endblock %}
+</body>
+</html>

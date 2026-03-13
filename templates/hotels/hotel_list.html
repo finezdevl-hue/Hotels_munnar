@@ -1,0 +1,99 @@
+{% extends 'base.html' %}
+{% block title %}Hotels — LuxeStay{% endblock %}
+{% block content %}
+
+<div class="page-hero">
+  <div class="container">
+    <p class="eyebrow mb-2">Discover</p>
+    <h1 class="mb-2">Find Your Hotel</h1>
+    <p style="color:var(--ink-3);margin:0;">{{ total }} hotel{{ total|pluralize }} found</p>
+  </div>
+</div>
+
+<div class="container section-pad-sm">
+  <div class="row g-4">
+    <!-- FILTERS -->
+    <div class="col-lg-3">
+      <div class="filter-panel">
+        <div class="filter-panel-title"><i class="bi bi-funnel"></i>Filter Results</div>
+        <form method="get">
+          <div class="mb-3"><label class="form-label">Search</label>{{ form.query }}</div>
+          <div class="mb-3"><label class="form-label">City</label>{{ form.city }}</div>
+          <div class="mb-3"><label class="form-label">Star Rating</label>{{ form.stars }}</div>
+          <div class="mb-3"><label class="form-label">Min Price / night</label>{{ form.min_price }}</div>
+          <div class="mb-4"><label class="form-label">Max Price / night</label>{{ form.max_price }}</div>
+          <button type="submit" class="btn-ls btn-gold w-full mb-2">Apply Filters</button>
+          <a href="{% url 'hotel_list' %}" class="btn-ls btn-dark w-full">Clear All</a>
+        </form>
+      </div>
+    </div>
+
+    <!-- RESULTS -->
+    <div class="col-lg-9">
+      {% if hotels %}
+      <div class="d-flex flex-column gap-3">
+        {% for hotel in hotels %}
+        <a href="{% url 'hotel_detail' hotel.slug %}" class="hotel-row-card">
+          <div class="hotel-row-img-wrap">
+            {% with hotel.get_main_image as img %}
+            <img class="hotel-row-img" src="{% if img %}{{ img.image.url }}{% else %}https://images.unsplash.com/photo-1566073771259-6a8506099945?w=500&q=80{% endif %}" alt="{{ hotel.name }}">
+            {% endwith %}
+          </div>
+          <div class="p-4 d-flex flex-column justify-content-between flex-grow-1">
+            <div>
+              <div class="d-flex justify-content-between align-items-start gap-3">
+                <div>
+                  <div class="hotel-stars mb-1">{% for i in "12345" %}{% if forloop.counter <= hotel.stars %}★{% endif %}{% endfor %}</div>
+                  <h5 style="font-family:'Cormorant Garamond',serif;color:var(--ink);margin-bottom:.25rem;">{{ hotel.name }}</h5>
+                  <p style="color:var(--ink-3);font-size:.8rem;margin-bottom:.75rem;"><i class="bi bi-geo-alt me-1"></i>{{ hotel.address }}, {{ hotel.city }}, {{ hotel.country }}</p>
+                </div>
+              </div>
+              <p style="color:var(--ink-3);font-size:.85rem;line-height:1.75;margin-bottom:.75rem;">{{ hotel.short_description }}</p>
+              {% if hotel.amenities.all %}
+              <div class="d-flex flex-wrap gap-1 mt-2">
+                {% for a in hotel.amenities.all|slice:":5" %}<span class="chip"><i class="{{ a.icon }}"></i>{{ a.name }}</span>{% endfor %}
+              </div>
+              {% endif %}
+            </div>
+            <div class="d-flex justify-content-between align-items-end mt-3">
+              <div>
+                {% with hotel.get_average_rating as rating %}
+                {% if rating %}<span class="badge-ls badge-gold"><i class="bi bi-star-fill me-1"></i>{{ rating }}/5</span>{% endif %}
+                {% endwith %}
+              </div>
+              <div class="text-end">
+                {% if hotel.get_min_price %}
+                <div style="font-size:.72rem;color:var(--ink-3);letter-spacing:1px;text-transform:uppercase;">From</div>
+                <div style="font-family:'Cormorant Garamond',serif;font-size:1.8rem;font-weight:700;color:var(--gold);line-height:1;">${{ hotel.get_min_price }}<span style="font-size:.85rem;color:var(--ink-3);font-family:'Outfit',sans-serif;">/night</span></div>
+                {% endif %}
+              </div>
+            </div>
+          </div>
+        </a>
+        {% endfor %}
+      </div>
+
+      {% if hotels.has_other_pages %}
+      <nav class="mt-4">
+        <ul class="pagination justify-content-center gap-1">
+          {% if hotels.has_previous %}<li class="page-item"><a class="page-link" href="?page={{ hotels.previous_page_number }}">←</a></li>{% endif %}
+          {% for num in hotels.paginator.page_range %}
+          <li class="page-item {% if hotels.number == num %}active{% endif %}"><a class="page-link" href="?page={{ num }}">{{ num }}</a></li>
+          {% endfor %}
+          {% if hotels.has_next %}<li class="page-item"><a class="page-link" href="?page={{ hotels.next_page_number }}">→</a></li>{% endif %}
+        </ul>
+      </nav>
+      {% endif %}
+
+      {% else %}
+      <div style="text-align:center;padding:5rem 2rem;background:var(--bg2);border:1px solid rgba(255,255,255,.055);border-radius:var(--r3);">
+        <i class="bi bi-building" style="font-size:2.5rem;color:var(--ink-3);display:block;margin-bottom:1rem;"></i>
+        <h5 style="font-family:'Cormorant Garamond',serif;color:var(--ink);">No hotels found</h5>
+        <p style="color:var(--ink-3);font-size:.88rem;">Try adjusting your search filters.</p>
+        <a href="{% url 'hotel_list' %}" class="btn-ls btn-ghost mt-2">Clear Filters</a>
+      </div>
+      {% endif %}
+    </div>
+  </div>
+</div>
+{% endblock %}

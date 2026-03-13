@@ -1,0 +1,62 @@
+{% extends 'employees/base.html' %}
+{% block title %}Booking {{ booking.booking_ref_short }}{% endblock %}
+{% block topbar_title %}Booking Detail{% endblock %}
+{% block nav_bookings %}active{% endblock %}
+
+{% block content %}
+<div class="sp-page-head">
+  <div><h2>Booking <code style="color:var(--gold);font-family:monospace;font-size:1.2rem;">{{ booking.booking_ref_short }}</code></h2><p>{{ hotel.name }}</p></div>
+  <a href="{% url 'employee_bookings' %}" class="sp-btn sb-ghost">← Back</a>
+</div>
+<div class="row g-3">
+  <div class="col-lg-7">
+    <div class="sp-panel sp-panel-gold sp-panel-body mb-3">
+      <div class="sp-panel-title"><i class="bi bi-person"></i>Guest Information</div>
+      <table style="width:100%;border-collapse:collapse;font-size:.84rem;">
+        {% for label,val in forloop.parentloop|zip:forloop %}
+        {% endfor %}
+        <tr style="border-bottom:1px solid rgba(255,255,255,.05);"><td style="padding:.55rem 0;color:var(--ink3);width:38%;">Full Name</td><td style="color:var(--ink);font-weight:500;">{{ booking.first_name }} {{ booking.last_name }}</td></tr>
+        <tr style="border-bottom:1px solid rgba(255,255,255,.05);"><td style="padding:.55rem 0;color:var(--ink3);">Email</td><td style="color:var(--ink);">{{ booking.email }}</td></tr>
+        <tr style="border-bottom:1px solid rgba(255,255,255,.05);"><td style="padding:.55rem 0;color:var(--ink3);">Phone</td><td style="color:var(--ink);">{{ booking.phone }}</td></tr>
+        <tr style="border-bottom:1px solid rgba(255,255,255,.05);"><td style="padding:.55rem 0;color:var(--ink3);">Guests</td><td style="color:var(--ink);">{{ booking.guests }}</td></tr>
+        {% if booking.special_requests %}
+        <tr><td style="padding:.55rem 0;color:var(--ink3);">Special Requests</td><td style="color:var(--ink);">{{ booking.special_requests }}</td></tr>
+        {% endif %}
+      </table>
+    </div>
+    <div class="sp-panel sp-panel-gold sp-panel-body">
+      <div class="sp-panel-title"><i class="bi bi-door-open"></i>Room & Dates</div>
+      <table style="width:100%;border-collapse:collapse;font-size:.84rem;">
+        <tr style="border-bottom:1px solid rgba(255,255,255,.05);"><td style="padding:.55rem 0;color:var(--ink3);width:38%;">Room</td><td style="color:var(--ink);font-weight:500;">{{ booking.room.name }}</td></tr>
+        <tr style="border-bottom:1px solid rgba(255,255,255,.05);"><td style="padding:.55rem 0;color:var(--ink3);">Check In</td><td style="color:var(--ink);">{{ booking.check_in }}</td></tr>
+        <tr style="border-bottom:1px solid rgba(255,255,255,.05);"><td style="padding:.55rem 0;color:var(--ink3);">Check Out</td><td style="color:var(--ink);">{{ booking.check_out }}</td></tr>
+        <tr style="border-bottom:1px solid rgba(255,255,255,.05);"><td style="padding:.55rem 0;color:var(--ink3);">Payment</td><td><span class="sp-badge {% if booking.payment_status == 'paid' %}sb-ok{% else %}sb-warn{% endif %}">{{ booking.get_payment_status_display }}</span></td></tr>
+        <tr><td style="padding:.55rem 0;color:var(--ink3);">Total</td><td style="font-family:'Cormorant Garamond',serif;font-size:1.5rem;font-weight:700;color:var(--gold);">${{ booking.total_price }}</td></tr>
+      </table>
+    </div>
+  </div>
+  <div class="col-lg-5">
+    <div class="sp-panel sp-panel-gold sp-panel-body">
+      <div class="sp-panel-title"><i class="bi bi-toggle-on"></i>Booking Status</div>
+      <div style="margin-bottom:1.25rem;">
+        <span style="font-size:.68rem;letter-spacing:2px;text-transform:uppercase;color:var(--ink3);display:block;margin-bottom:.5rem;">Current Status</span>
+        <span class="sp-badge s-{{ booking.status }}" style="font-size:.78rem;padding:.4em 1em;">{{ booking.get_status_display }}</span>
+      </div>
+      {% if emp.can_manage_bookings %}
+      <form method="post">
+        {% csrf_token %}
+        <label class="sp-label">Update Status</label>
+        <select name="status" class="sp-select" style="margin-bottom:.75rem;">
+          {% for val,label in status_choices %}
+          <option value="{{ val }}" {% if booking.status == val %}selected{% endif %}>{{ label }}</option>
+          {% endfor %}
+        </select>
+        <button type="submit" class="sp-btn sb-primary" style="width:100%;justify-content:center;"><i class="bi bi-check-lg me-1"></i>Update Status</button>
+      </form>
+      {% else %}
+      <div style="background:var(--bg3);border-radius:var(--r2);padding:.85rem;font-size:.78rem;color:var(--ink3);display:flex;gap:.5rem;align-items:center;"><i class="bi bi-lock"></i>You don't have permission to update booking status.</div>
+      {% endif %}
+    </div>
+  </div>
+</div>
+{% endblock %}

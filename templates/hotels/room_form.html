@@ -1,0 +1,68 @@
+{% extends 'base.html' %}
+{% block title %}{% if room %}Edit Room{% else %}Add Room{% endif %} — {{ hotel.name }}{% endblock %}
+
+{% block content %}
+<div class="page-header">
+    <div class="container">
+        <h2>{% if room %}Edit Room{% else %}Add Room{% endif %}</h2>
+        <p class="filter-panel-title mb-0">{{ hotel.name }}</p>
+    </div>
+</div>
+<div class="container my-5">
+    <div class="row justify-content-center">
+        <div class="col-lg-8">
+            <form method="post" enctype="multipart/form-data">
+                {% csrf_token %}
+                <div class="p-4" style="border:1px solid #eee; border-top: 3px solid var(--gold);">
+                    <div class="row g-3">
+                        <div class="col-md-8">
+                            <label class="form-label small filter-panel-title">Room Name *</label>{{ form.name }}
+                        </div>
+                        <div class="col-md-4">
+                            <label class="form-label small filter-panel-title">Room Number *</label>{{ form.room_number }}
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label small filter-panel-title">Room Type</label>{{ form.room_type }}
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label small filter-panel-title">Bed Type</label>{{ form.bed_type }}
+                        </div>
+                        <div class="col-12">
+                            <label class="form-label small filter-panel-title">Description</label>{{ form.description }}
+                        </div>
+                        <div class="col-md-4">
+                            <label class="form-label small filter-panel-title">Max Guests</label>{{ form.capacity }}
+                        </div>
+                        <div class="col-md-4">
+                            <label class="form-label small filter-panel-title">Price Per Night ($)</label>{{ form.price_per_night }}
+                        </div>
+                        <div class="col-md-4">
+                            <label class="form-label small filter-panel-title">Room Size (m²)</label>{{ form.size_sqm }}
+                        </div>
+                        <div class="col-12">
+                            <label class="form-label small filter-panel-title">Room Photo</label>{{ form.image }}
+                        </div>
+                        <div class="col-12">
+                            <label class="form-label small filter-panel-title">Room Amenities</label>
+                            <div class="row g-2 mt-1">
+                                {% for choice in form.amenities %}
+                                <div class="col-md-3 col-6">
+                                    <div class="form-check">{{ choice.tag }}<label class="form-check-label small" for="{{ choice.id_for_label }}">{{ choice.choice_label }}</label></div>
+                                </div>
+                                {% endfor %}
+                            </div>
+                        </div>
+                        <div class="col-12">
+                            <div class="form-check">{{ form.is_available }}<label class="form-check-label" for="{{ form.is_available.id_for_label }}">Room is Available for Booking</label></div>
+                        </div>
+                    </div>
+                </div>
+                <div class="d-flex gap-3 mt-3">
+                    <button type="submit" class="btn btn-gold px-5">Save Room</button>
+                    <a href="{% url 'hotel_manage' hotel.slug %}" class="btn btn-outline-secondary">Cancel</a>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %}

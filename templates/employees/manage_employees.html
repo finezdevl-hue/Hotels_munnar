@@ -1,0 +1,75 @@
+{% extends 'base.html' %}
+{% block title %}Employees — {{ hotel.name }}{% endblock %}
+{% block content %}
+<div class="page-hero">
+  <div class="container">
+    <p class="eyebrow mb-1">{{ hotel.name }}</p>
+    <h1>Staff Management</h1>
+    <p style="color:var(--ink-3);margin:.5rem 0 0;">Manage employees and their access permissions</p>
+  </div>
+</div>
+
+<div class="container section-pad-sm">
+  <div class="d-flex justify-content-between align-items-center mb-4 flex-wrap gap-3">
+    <div style="display:flex;gap:.5rem;flex-wrap:wrap;">
+      <a href="{% url 'hotel_manage' hotel.slug %}" class="btn-ls btn-dark sm"><i class="bi bi-arrow-left me-1"></i>Back to Hotel</a>
+      <a href="{% url 'hotel_detail' hotel.slug %}" class="btn-ls btn-dark sm" target="_blank"><i class="bi bi-eye me-1"></i>View Hotel</a>
+    </div>
+    <a href="{% url 'add_employee' hotel.slug %}" class="btn-ls btn-gold"><i class="bi bi-person-plus-fill me-2"></i>Add Employee</a>
+  </div>
+
+  <!-- info box -->
+  <div style="background:var(--gold-bg);border:1px solid var(--gold-bd);border-radius:var(--r3);padding:1.25rem 1.5rem;margin-bottom:1.75rem;display:flex;gap:1rem;align-items:flex-start;">
+    <i class="bi bi-info-circle" style="color:var(--gold);font-size:1.1rem;flex-shrink:0;margin-top:2px;"></i>
+    <div>
+      <div style="font-family:'Cormorant Garamond',serif;font-size:1.05rem;color:var(--ink);margin-bottom:.3rem;">Employee Login Portal</div>
+      <div style="font-size:.83rem;color:var(--ink-2);">Employees sign in at <a href="/staff/login/" style="color:var(--gold);font-weight:500;">/staff/login/</a> using their username and password. They can only access this hotel's data.</div>
+    </div>
+  </div>
+
+  {% if employees %}
+  <div class="row g-3">
+    {% for emp in employees %}
+    <div class="col-lg-6">
+      <div style="background:var(--bg2);border:1px solid rgba(255,255,255,.06);border-radius:var(--r3);padding:1.4rem;transition:border-color .2s;{% if not emp.is_active %}opacity:.6;{% endif %}">
+        <div style="display:flex;align-items:flex-start;gap:1rem;margin-bottom:1rem;">
+          <div style="width:46px;height:46px;border-radius:50%;background:var(--gold-bg);border:2px solid var(--gold-bd);display:flex;align-items:center;justify-content:center;font-family:'Cormorant Garamond',serif;font-size:1.25rem;color:var(--gold);flex-shrink:0;">{{ emp.user.first_name.0|default:emp.user.username.0|upper }}</div>
+          <div style="flex:1;min-width:0;">
+            <div style="display:flex;align-items:center;gap:.5rem;flex-wrap:wrap;">
+              <span style="font-family:'Cormorant Garamond',serif;font-size:1.05rem;color:var(--ink);font-weight:600;">{{ emp.user.get_full_name|default:emp.user.username }}</span>
+              {% if emp.is_active %}<span style="background:rgba(79,168,122,.12);color:#80cfa0;font-size:.58rem;font-weight:600;letter-spacing:1.5px;text-transform:uppercase;padding:.2em .65em;border-radius:var(--r1);">Active</span>
+              {% else %}<span style="background:rgba(184,80,80,.12);color:#d88;font-size:.58rem;font-weight:600;letter-spacing:1.5px;text-transform:uppercase;padding:.2em .65em;border-radius:var(--r1);">Inactive</span>{% endif %}
+            </div>
+            <div style="font-size:.75rem;color:var(--gold);letter-spacing:1px;margin:.1rem 0 .2rem;">{{ emp.job_title }}</div>
+            <div style="font-size:.76rem;color:var(--ink-3);">@{{ emp.user.username }} · {{ emp.user.email }}</div>
+          </div>
+        </div>
+
+        <!-- permissions chips -->
+        <div style="display:flex;flex-wrap:wrap;gap:.35rem;margin-bottom:1rem;">
+          {% for p in emp.permission_summary %}
+          <span style="background:var(--gold-bg);border:1px solid var(--gold-bd);color:var(--gold);font-size:.6rem;font-weight:600;letter-spacing:1px;text-transform:uppercase;padding:.22em .65em;border-radius:var(--r1);">{{ p }}</span>
+          {% empty %}
+          <span style="color:var(--ink-3);font-size:.78rem;">No permissions assigned</span>
+          {% endfor %}
+        </div>
+
+        <div style="display:flex;gap:.5rem;flex-wrap:wrap;padding-top:.75rem;border-top:1px solid rgba(255,255,255,.05);">
+          <a href="{% url 'edit_employee' hotel.slug emp.pk %}" class="btn-ls btn-ghost sm"><i class="bi bi-pencil me-1"></i>Edit</a>
+          <a href="{% url 'toggle_employee' hotel.slug emp.pk %}" class="btn-ls btn-dark sm">{% if emp.is_active %}<i class="bi bi-pause-circle me-1"></i>Deactivate{% else %}<i class="bi bi-play-circle me-1"></i>Activate{% endif %}</a>
+          <a href="{% url 'delete_employee' hotel.slug emp.pk %}" class="btn-ls sm" style="background:transparent;color:#d88;border:1px solid rgba(184,80,80,.3);border-radius:var(--r1);padding:.55rem 1.2rem;font-size:.7rem;font-weight:600;letter-spacing:1.5px;text-transform:uppercase;" onclick="return confirm('Remove {{ emp.user.username }}? This cannot be undone.')"><i class="bi bi-trash me-1"></i>Remove</a>
+        </div>
+      </div>
+    </div>
+    {% endfor %}
+  </div>
+  {% else %}
+  <div style="text-align:center;padding:5rem 2rem;background:var(--bg2);border:1px solid rgba(255,255,255,.055);border-radius:var(--r3);">
+    <i class="bi bi-people" style="font-size:2.5rem;color:var(--ink-3);display:block;margin-bottom:1rem;"></i>
+    <h5 style="font-family:'Cormorant Garamond',serif;color:var(--ink);">No employees yet</h5>
+    <p style="color:var(--ink-3);font-size:.88rem;max-width:380px;margin:.5rem auto 1.5rem;">Add staff members and assign them specific permissions to manage your hotel operations.</p>
+    <a href="{% url 'add_employee' hotel.slug %}" class="btn-ls btn-gold"><i class="bi bi-person-plus-fill me-2"></i>Add First Employee</a>
+  </div>
+  {% endif %}
+</div>
+{% endblock %}

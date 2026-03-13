@@ -1,0 +1,35 @@
+{% extends 'custom_admin/base.html' %}
+{% block title %}Reviews — Admin{% endblock %}
+{% block topbar_title %}Reviews{% endblock %}
+{% block nav_reviews %}active{% endblock %}
+
+{% block content %}
+<div class="adm-page-head">
+  <div><h2>Reviews</h2><p>{{ reviews.paginator.count }} review{{ reviews.paginator.count|pluralize }}</p></div>
+</div>
+<div class="adm-table-wrap">
+  <table class="adm-table">
+    <thead><tr><th>Guest</th><th>Hotel</th><th>Rating</th><th>Title</th><th>Date</th><th></th></tr></thead>
+    <tbody>
+      {% for r in reviews %}
+      <tr>
+        <td style="font-size:.83rem;font-weight:500;color:var(--ink);">{{ r.user.get_full_name|default:r.user.username }}</td>
+        <td style="font-size:.8rem;"><a href="{% url 'hotel_detail' r.hotel.slug %}" style="color:var(--gold);" target="_blank">{{ r.hotel.name }}</a></td>
+        <td><span style="color:var(--gold);">{% for i in "12345" %}{% if forloop.counter <= r.rating %}★{% else %}☆{% endif %}{% endfor %}</span><span style="color:var(--ink3);font-size:.72rem;margin-left:4px;">{{ r.rating }}/5</span></td>
+        <td style="font-size:.8rem;color:var(--ink2);">{{ r.title|truncatechars:40 }}</td>
+        <td style="font-size:.76rem;color:var(--ink3);">{{ r.created_at|date:"d M Y" }}</td>
+        <td><a href="{% url 'admin_review_delete' r.pk %}" class="adm-btn adm-btn-bad" style="padding:.3rem .55rem;font-size:.72rem;" onclick="return confirm('Delete this review?')"><i class="bi bi-trash"></i></a></td>
+      </tr>
+      {% empty %}
+      <tr><td colspan="6" style="text-align:center;padding:3rem;color:var(--ink3);">No reviews yet</td></tr>
+      {% endfor %}
+    </tbody>
+  </table>
+  {% if reviews.has_other_pages %}
+  <div style="padding:1rem 1.5rem;border-top:1px solid rgba(255,255,255,.05);display:flex;gap:.5rem;">
+    {% if reviews.has_previous %}<a href="?page={{ reviews.previous_page_number }}" class="adm-btn adm-btn-ghost" style="font-size:.72rem;padding:.35rem .75rem;">← Prev</a>{% endif %}
+    {% if reviews.has_next %}<a href="?page={{ reviews.next_page_number }}" class="adm-btn adm-btn-ghost" style="font-size:.72rem;padding:.35rem .75rem;">Next →</a>{% endif %}
+  </div>
+  {% endif %}
+</div>
+{% endblock %}

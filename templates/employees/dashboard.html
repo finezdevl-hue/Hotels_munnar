@@ -1,0 +1,81 @@
+{% extends 'employees/base.html' %}
+{% block title %}Dashboard{% endblock %}
+{% block topbar_title %}Dashboard{% endblock %}
+{% block nav_dash %}active{% endblock %}
+
+{% block content %}
+<div class="sp-page-head">
+  <div>
+    <h2>Welcome, {{ request.user.first_name|default:request.user.username }}</h2>
+    <p>{% now "l, d F Y" %} · {{ hotel.name }}</p>
+  </div>
+</div>
+
+<!-- STAT CARDS -->
+<div class="row g-3 mb-4">
+  {% if total_bookings is not None %}
+  <div class="col-md-3 col-6">
+    <div class="sp-stat"><div class="sp-stat-icon ic-gold"><i class="bi bi-calendar-check"></i></div><div class="sp-stat-val">{{ total_bookings }}</div><div class="sp-stat-lbl">Total Bookings</div></div>
+  </div>
+  <div class="col-md-3 col-6">
+    <div class="sp-stat"><div class="sp-stat-icon ic-warn"><i class="bi bi-hourglass-split"></i></div><div class="sp-stat-val">{{ pending_bookings }}</div><div class="sp-stat-lbl">Pending</div></div>
+  </div>
+  <div class="col-md-3 col-6">
+    <div class="sp-stat"><div class="sp-stat-icon ic-ok"><i class="bi bi-check-circle"></i></div><div class="sp-stat-val">{{ confirmed_bookings }}</div><div class="sp-stat-lbl">Confirmed</div></div>
+  </div>
+  {% endif %}
+  {% if total_rooms is not None %}
+  <div class="col-md-3 col-6">
+    <div class="sp-stat"><div class="sp-stat-icon ic-info"><i class="bi bi-door-open"></i></div><div class="sp-stat-val">{{ total_rooms }}</div><div class="sp-stat-lbl">Rooms</div></div>
+  </div>
+  {% endif %}
+  {% if total_reviews is not None %}
+  <div class="col-md-3 col-6">
+    <div class="sp-stat"><div class="sp-stat-icon ic-gold"><i class="bi bi-star"></i></div><div class="sp-stat-val">{{ total_reviews }}</div><div class="sp-stat-lbl">Reviews</div></div>
+  </div>
+  {% endif %}
+</div>
+
+<div class="row g-3">
+  <!-- RECENT BOOKINGS -->
+  {% if recent_bookings %}
+  <div class="col-lg-8">
+    <div class="sp-table-wrap">
+      <div class="sp-table-head">
+        <h6>Recent Bookings</h6>
+        {% if emp.can_view_bookings %}<a href="{% url 'employee_bookings' %}" class="sp-btn sb-ghost" style="font-size:.62rem;padding:.3rem .75rem;">View All</a>{% endif %}
+      </div>
+      <table class="sp-table">
+        <thead><tr><th>Guest</th><th>Room</th><th>Check In</th><th>Total</th><th>Status</th></tr></thead>
+        <tbody>
+          {% for b in recent_bookings %}
+          <tr>
+            <td><div style="font-weight:500;color:var(--ink);">{{ b.first_name }} {{ b.last_name }}</div><div style="font-size:.7rem;color:var(--ink3);">{{ b.email }}</div></td>
+            <td style="font-size:.8rem;">{{ b.room.name }}</td>
+            <td style="font-size:.78rem;color:var(--ink3);">{{ b.check_in }}</td>
+            <td style="color:var(--gold);font-weight:600;">${{ b.total_price }}</td>
+            <td><span class="sp-badge s-{{ b.status }}">{{ b.get_status_display }}</span></td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </div>
+  {% endif %}
+
+  <!-- PERMISSIONS -->
+  <div class="col-lg-4">
+    <div class="sp-panel sp-panel-gold sp-panel-body">
+      <div class="sp-panel-title"><i class="bi bi-shield-check"></i>My Permissions</div>
+      <div style="display:flex;flex-direction:column;gap:.4rem;">
+        {% for perm in emp.permission_summary %}
+        <div style="display:flex;align-items:center;gap:.5rem;padding:.4rem .6rem;background:var(--gold-bg);border-radius:var(--r1);font-size:.76rem;color:var(--gold);"><i class="bi bi-check2"></i>{{ perm }}</div>
+        {% empty %}
+        <p style="color:var(--ink3);font-size:.82rem;">No permissions assigned yet.</p>
+        {% endfor %}
+      </div>
+      <div style="margin-top:1rem;padding-top:.75rem;border-top:1px solid rgba(255,255,255,.05);font-size:.72rem;color:var(--ink3);">Contact your hotel manager to update permissions.</div>
+    </div>
+  </div>
+</div>
+{% endblock %}

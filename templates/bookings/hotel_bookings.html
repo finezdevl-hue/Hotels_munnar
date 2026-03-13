@@ -1,0 +1,92 @@
+{% extends 'base.html' %}
+{% block title %}Bookings — {{ hotel.name }}{% endblock %}
+
+{% block content %}
+<div class="page-header">
+    <div class="container d-flex justify-content-between align-items-center">
+        <div>
+            <h2>Bookings — {{ hotel.name }}</h2>
+            <p class="filter-panel-title mb-0">Manage guest reservations</p>
+        </div>
+        <a href="{% url 'hotel_manage' hotel.slug %}" class="btn btn-outline-gold">← Back to Hotel</a>
+    </div>
+</div>
+
+<div class="container my-4">
+    <!-- FILTER TABS -->
+    <div class="d-flex gap-2 mb-4 flex-wrap">
+        <a href="?" class="btn btn-sm {% if not status_filter %}btn-gold{% else %}btn-outline-secondary{% endif %}" style="border-radius:0;">All</a>
+        <a href="?status=pending" class="btn btn-sm {% if status_filter == 'pending' %}btn-gold{% else %}btn-outline-secondary{% endif %}" style="border-radius:0;">Pending</a>
+        <a href="?status=confirmed" class="btn btn-sm {% if status_filter == 'confirmed' %}btn-gold{% else %}btn-outline-secondary{% endif %}" style="border-radius:0;">Confirmed</a>
+        <a href="?status=checked_in" class="btn btn-sm {% if status_filter == 'checked_in' %}btn-gold{% else %}btn-outline-secondary{% endif %}" style="border-radius:0;">Checked In</a>
+        <a href="?status=checked_out" class="btn btn-sm {% if status_filter == 'checked_out' %}btn-gold{% else %}btn-outline-secondary{% endif %}" style="border-radius:0;">Checked Out</a>
+        <a href="?status=cancelled" class="btn btn-sm {% if status_filter == 'cancelled' %}btn-gold{% else %}btn-outline-secondary{% endif %}" style="border-radius:0;">Cancelled</a>
+    </div>
+
+    {% if bookings %}
+    <div class="table-responsive">
+        <table class="table table-hover align-middle">
+            <thead style="background:#f5f5f5; font-size:0.75rem; text-transform:uppercase; letter-spacing:1px;">
+                <tr>
+                    <th>Ref</th>
+                    <th>Guest</th>
+                    <th>Room</th>
+                    <th>Dates</th>
+                    <th>Guests</th>
+                    <th>Total</th>
+                    <th>Status</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for booking in bookings %}
+                <tr>
+                    <td><code>{{ booking.booking_ref_short }}</code><br><small class="filter-panel-title">{{ booking.created_at|date:"d M" }}</small></td>
+                    <td>
+                        <strong>{{ booking.first_name }} {{ booking.last_name }}</strong><br>
+                        <a href="mailto:{{ booking.email }}" class="small filter-panel-title">{{ booking.email }}</a><br>
+                        <span class="small filter-panel-title">{{ booking.phone }}</span>
+                    </td>
+                    <td>{{ booking.room.name }}<br><small class="filter-panel-title">#{{ booking.room.room_number }}</small></td>
+                    <td class="small">
+                        <strong>{{ booking.check_in|date:"d M Y" }}</strong><br>
+                        <i class="bi bi-arrow-down filter-panel-title"></i><br>
+                        <strong>{{ booking.check_out|date:"d M Y" }}</strong><br>
+                        <span class="filter-panel-title">{{ booking.nights }}n</span>
+                    </td>
+                    <td>{{ booking.guests }}</td>
+                    <td class="text-gold fw-bold">${{ booking.total_price }}</td>
+                    <td>
+                        <span class="badge" style="border-radius:0; background:{% if booking.status == 'confirmed' %}#198754{% elif booking.status == 'cancelled' %}#dc3545{% elif booking.status == 'pending' %}#ffc107; color:#000{% elif booking.status == 'checked_in' %}#0dcaf0; color:#000{% else %}#6c757d{% endif %};">
+                            {{ booking.get_status_display }}
+                        </span>
+                    </td>
+                    <td>
+                        <form method="post" action="{% url 'update_booking_status' booking.pk %}">
+                            {% csrf_token %}
+                            <div class="d-flex gap-1">
+                                <select name="status" class="form-select form-select-sm" style="border-radius:0; font-size:0.75rem; width:auto;">
+                                    <option value="pending">Pending</option>
+                                    <option value="confirmed" {% if booking.status == 'confirmed' %}selected{% endif %}>Confirmed</option>
+                                    <option value="checked_in" {% if booking.status == 'checked_in' %}selected{% endif %}>Checked In</option>
+                                    <option value="checked_out" {% if booking.status == 'checked_out' %}selected{% endif %}>Checked Out</option>
+                                    <option value="cancelled" {% if booking.status == 'cancelled' %}selected{% endif %}>Cancelled</option>
+                                </select>
+                                <button type="submit" class="btn btn-gold btn-sm" style="font-size:0.7rem; padding:4px 8px;">Update</button>
+                            </div>
+                        </form>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+    {% else %}
+    <div class="text-center py-5">
+        <i class="bi bi-calendar-x display-1 filter-panel-title"></i>
+        <h4 class="mt-3">No bookings found</h4>
+        {% if status_filter %}<a href="?" class="btn btn-outline-secondary mt-2">Show All</a>{% endif %}
+    </div>
+    {% endif %}
+</div>
+{% endblock %}

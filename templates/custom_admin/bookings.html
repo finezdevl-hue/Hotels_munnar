@@ -1,0 +1,77 @@
+{% extends 'custom_admin/base.html' %}
+{% block title %}Bookings — Admin{% endblock %}
+{% block topbar_title %}Bookings{% endblock %}
+{% block nav_bookings %}active{% endblock %}
+
+{% block content %}
+<div class="adm-page-head">
+  <div><h2>Bookings</h2><p>{{ bookings.paginator.count }} total · Revenue: <span style="color:var(--gold);font-weight:600;">${{ total_revenue|floatformat:0 }}</span></p></div>
+</div>
+
+<!-- STATUS TABS -->
+<div class="d-flex gap-2 mb-3 flex-wrap">
+  {% for label,val,color in status_tabs %}
+  <a href="?status={{ val }}" class="adm-btn {% if current_status == val %}adm-btn-gold{% else %}adm-btn-ghost{% endif %}" style="font-size:.65rem;padding:.38rem .9rem;{% if current_status != val %}border-color:{{ color }}44;color:{{ color }};{% endif %}">{{ label }}</a>
+  {% endfor %}
+</div>
+
+<!-- FILTERS -->
+<div class="adm-panel adm-panel-body mb-4">
+  <form method="get" class="d-flex gap-3 flex-wrap align-items-end">
+    <input type="hidden" name="status" value="{{ current_status }}">
+    <div><label class="adm-label">Search Guest / Ref</label><input type="text" name="q" value="{{ request.GET.q }}" class="adm-input" placeholder="Name, email or ref…" style="width:220px;"></div>
+    <div><label class="adm-label">Hotel</label>
+      <select name="hotel" class="adm-select" style="width:170px;">
+        <option value="">All Hotels</option>
+        {% for h in all_hotels %}<option value="{{ h.id }}" {% if request.GET.hotel == h.id|stringformat:"s" %}selected{% endif %}>{{ h.name|truncatechars:22 }}</option>{% endfor %}
+      </select>
+    </div>
+    <div><label class="adm-label">From Date</label><input type="date" name="date_from" value="{{ request.GET.date_from }}" class="adm-input" style="width:155px;"></div>
+    <button type="submit" class="adm-btn adm-btn-gold">Filter</button>
+    <a href="{% url 'admin_bookings' %}" class="adm-btn adm-btn-ghost">Reset</a>
+  </form>
+</div>
+
+<div class="adm-table-wrap">
+  <table class="adm-table">
+    <thead><tr><th>Ref</th><th>Guest</th><th>Hotel / Room</th><th>Dates</th><th>Total</th><th>Status</th><th>Payment</th><th></th></tr></thead>
+    <tbody>
+      {% for b in bookings %}
+      <tr>
+        <td><code style="color:var(--gold);font-size:.73rem;background:var(--bg3);padding:.15rem .4rem;border-radius:var(--r1);">{{ b.booking_ref_short }}</code><div style="font-size:.68rem;color:var(--ink3);margin-top:2px;">{{ b.created_at|date:"d M Y" }}</div></td>
+        <td><div style="font-weight:500;font-size:.83rem;color:var(--ink);">{{ b.first_name }} {{ b.last_name }}</div><div style="font-size:.72rem;color:var(--ink3);">{{ b.email }}</div></td>
+        <td style="font-size:.8rem;"><div style="font-weight:500;color:var(--ink);">{{ b.room.hotel.name|truncatechars:20 }}</div><div style="color:var(--ink3);font-size:.72rem;">{{ b.room.name }}</div></td>
+        <td style="font-size:.78rem;"><div style="color:var(--ink);">{{ b.check_in|date:"d M Y" }}</div><div style="color:var(--ink3);">→ {{ b.check_out|date:"d M Y" }}</div><div style="color:var(--gold);font-size:.7rem;">{{ b.nights }}n</div></td>
+        <td style="color:var(--gold);font-weight:600;">${{ b.total_price }}</td>
+        <td>
+          <form method="post" action="{% url 'admin_booking_status' b.pk %}">{% csrf_token %}
+            <select name="status" class="adm-select" style="font-size:.72rem;padding:.25rem .5rem;width:108px;" onchange="this.form.submit()">
+              {% for val,label in booking_statuses %}<option value="{{ val }}" {% if b.status == val %}selected{% endif %}>{{ label }}</option>{% endfor %}
+            </select>
+          </form>
+        </td>
+        <td>
+          <form method="post" action="{% url 'admin_booking_payment' b.pk %}">{% csrf_token %}
+            <select name="payment_status" class="adm-select" style="font-size:.72rem;padding:.25rem .5rem;width:88px;" onchange="this.form.submit()">
+              <option value="unpaid" {% if b.payment_status == 'unpaid' %}selected{% endif %}>Unpaid</option>
+              <option value="paid" {% if b.payment_status == 'paid' %}selected{% endif %}>Paid</option>
+              <option value="refunded" {% if b.payment_status == 'refunded' %}selected{% endif %}>Refunded</option>
+            </select>
+          </form>
+        </td>
+        <td><a href="{% url 'booking_detail' b.pk %}" class="adm-btn adm-btn-ghost" style="padding:.3rem .55rem;font-size:.72rem;"><i class="bi bi-eye"></i></a></td>
+      </tr>
+      {% empty %}
+      <tr><td colspan="8" style="text-align:center;padding:3rem;color:var(--ink3);"><i class="bi bi-calendar-x" style="font-size:2rem;display:block;margin-bottom:.5rem;"></i>No bookings found</td></tr>
+      {% endfor %}
+    </tbody>
+  </table>
+  {% if bookings.has_other_pages %}
+  <div style="padding:1rem 1.5rem;border-top:1px solid rgba(255,255,255,.05);display:flex;gap:.5rem;align-items:center;">
+    <span style="font-size:.78rem;color:var(--ink3);margin-right:auto;">Page {{ bookings.number }} of {{ bookings.paginator.num_pages }}</span>
+    {% if bookings.has_previous %}<a href="?page={{ bookings.previous_page_number }}" class="adm-btn adm-btn-ghost" style="font-size:.72rem;padding:.35rem .75rem;">← Prev</a>{% endif %}
+    {% if bookings.has_next %}<a href="?page={{ bookings.next_page_number }}" class="adm-btn adm-btn-ghost" style="font-size:.72rem;padding:.35rem .75rem;">Next →</a>{% endif %}
+  </div>
+  {% endif %}
+</div>
+{% endblock %}

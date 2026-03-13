@@ -1,0 +1,53 @@
+{% extends 'base.html' %}
+{% block title %}Create Account — LuxeStay{% endblock %}
+{% block content %}
+<div class="auth-wrap" style="padding:3rem 2rem;">
+  <div class="auth-card wide">
+    <div class="auth-card-head">
+      <div class="auth-brand-txt mb-2">LUXE<span style="color:var(--ink);font-weight:300;">STAY</span></div>
+      <h3 style="color:var(--ink);margin-bottom:.3rem;">Join LuxeStay</h3>
+      <p style="color:var(--ink-3);font-size:.85rem;margin:0;">Create your free account today</p>
+    </div>
+    <div class="auth-card-body">
+      <form method="post">
+        {% csrf_token %}
+        <div class="mb-4">
+          <label class="form-label mb-2">I am a...</label>
+          <div class="role-grid">
+            <label class="role-option">
+              <input type="radio" name="role" value="guest" checked>
+              <i class="bi bi-person-luggage"></i>
+              <strong>Traveller</strong>
+              <small>Search & book hotels</small>
+            </label>
+            <label class="role-option">
+              <input type="radio" name="role" value="hotel_owner">
+              <i class="bi bi-building"></i>
+              <strong>Hotel Owner</strong>
+              <small>List my property</small>
+            </label>
+          </div>
+        </div>
+        <div class="row g-3">
+          <div class="col-md-6"><label class="form-label">First Name</label>{{ form.first_name }}</div>
+          <div class="col-md-6"><label class="form-label">Last Name</label>{{ form.last_name }}</div>
+          <div class="col-12"><label class="form-label">Username</label>{{ form.username }}</div>
+          <div class="col-12"><label class="form-label">Email Address</label>{{ form.email }}</div>
+          <div class="col-md-6"><label class="form-label">Password</label>{{ form.password1 }}</div>
+          <div class="col-md-6"><label class="form-label">Confirm Password</label>{{ form.password2 }}</div>
+        </div>
+        {% if form.errors %}
+        <div class="alert alert-danger mt-3">
+          {% for f,errs in form.errors.items %}{% for e in errs %}{{ e }}<br>{% endfor %}{% endfor %}
+        </div>
+        {% endif %}
+        <button type="submit" class="btn-ls btn-gold w-full mt-4" style="padding:.85rem;">Create Account</button>
+      </form>
+      <div class="auth-sep">or</div>
+      <p style="text-align:center;color:var(--ink-3);font-size:.85rem;margin:0;">
+        Already have an account? <a href="{% url 'login' %}">Sign in →</a>
+      </p>
+    </div>
+  </div>
+</div>
+{% endblock %}

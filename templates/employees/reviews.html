@@ -1,0 +1,28 @@
+{% extends 'employees/base.html' %}
+{% block title %}Reviews{% endblock %}
+{% block topbar_title %}Reviews{% endblock %}
+{% block nav_reviews %}active{% endblock %}
+{% block content %}
+<div class="sp-page-head">
+  <div><h2>Reviews</h2><p>{{ hotel.name }} · {{ reviews.count }} review{{ reviews.count|pluralize }}</p></div>
+</div>
+<div class="sp-table-wrap">
+  <table class="sp-table">
+    <thead><tr><th>Guest</th><th>Rating</th><th>Title</th><th>Comment</th><th>Date</th>{% if emp.can_manage_reviews %}<th></th>{% endif %}</tr></thead>
+    <tbody>
+      {% for r in reviews %}
+      <tr>
+        <td style="font-weight:500;font-size:.82rem;color:var(--ink);">{{ r.user.get_full_name|default:r.user.username }}</td>
+        <td><span style="color:var(--gold);">{% for i in "12345" %}{% if forloop.counter <= r.rating %}★{% else %}☆{% endif %}{% endfor %}</span></td>
+        <td style="font-size:.8rem;color:var(--ink);">{{ r.title|truncatechars:30 }}</td>
+        <td style="font-size:.76rem;color:var(--ink3);max-width:220px;">{{ r.comment|truncatechars:70 }}</td>
+        <td style="font-size:.74rem;color:var(--ink3);">{{ r.created_at|date:"d M Y" }}</td>
+        {% if emp.can_manage_reviews %}<td><a href="{% url 'employee_review_delete' r.pk %}" class="sp-btn sb-danger" style="padding:.28rem .55rem;font-size:.68rem;" onclick="return confirm('Delete this review?')"><i class="bi bi-trash"></i></a></td>{% endif %}
+      </tr>
+      {% empty %}
+      <tr><td colspan="6" style="text-align:center;padding:3rem;color:var(--ink3);">No reviews yet</td></tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>
+{% endblock %}

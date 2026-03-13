@@ -1,0 +1,70 @@
+{% extends 'custom_admin/base.html' %}
+{% block title %}{{ profile_user.username }} — Admin{% endblock %}
+{% block topbar_title %}User Detail{% endblock %}
+{% block nav_users %}active{% endblock %}
+
+{% block content %}
+<div class="adm-page-head">
+  <div><h2>{{ profile_user.get_full_name|default:profile_user.username }}</h2><p>@{{ profile_user.username }} · Joined {{ profile_user.date_joined|date:"d F Y" }}</p></div>
+  <div class="d-flex gap-2">
+    <a href="{% url 'admin_users' %}" class="adm-btn adm-btn-ghost">← Back</a>
+    <a href="{% url 'admin_toggle_staff' profile_user.pk %}" class="adm-btn adm-btn-ghost" onclick="return confirm('Toggle admin?')">
+      <i class="bi bi-shield{% if profile_user.is_staff %}-fill{% endif %} me-1"></i>{% if profile_user.is_staff %}Revoke Admin{% else %}Grant Admin{% endif %}
+    </a>
+  </div>
+</div>
+<div class="row g-3">
+  <div class="col-md-4">
+    <div class="adm-panel adm-panel-gold adm-panel-body mb-3">
+      <div style="text-align:center;margin-bottom:1.5rem;">
+        <div style="width:68px;height:68px;border-radius:50%;background:var(--gold-bg);border:2px solid var(--gold-bd);display:flex;align-items:center;justify-content:center;margin:0 auto .75rem;font-family:'Cormorant Garamond',serif;font-size:1.8rem;color:var(--gold);">{{ profile_user.first_name.0|default:profile_user.username.0|upper }}</div>
+        <div style="font-family:'Cormorant Garamond',serif;font-size:1.1rem;color:var(--ink);">{{ profile_user.get_full_name|default:profile_user.username }}</div>
+      </div>
+      <table style="width:100%;font-size:.8rem;border-collapse:collapse;">
+        {% for label,val in profile_rows %}<tr style="border-bottom:1px solid rgba(255,255,255,.05);"><td style="padding:.5rem 0;color:var(--ink3);width:42%;">{{ label }}</td><td style="color:var(--ink);font-weight:500;">{{ val }}</td></tr>{% endfor %}
+        <tr style="border-bottom:1px solid rgba(255,255,255,.05);"><td style="padding:.5rem 0;color:var(--ink3);">Email</td><td style="color:var(--ink);">{{ profile_user.email }}</td></tr>
+        <tr style="border-bottom:1px solid rgba(255,255,255,.05);"><td style="padding:.5rem 0;color:var(--ink3);">Role</td><td>
+          {% if profile_user.is_staff %}<span class="adm-badge-status s-active">Admin</span>
+          {% elif profile_user.profile.role == 'hotel_owner' %}<span class="adm-badge-status s-checked_in">Owner</span>
+          {% else %}<span class="adm-badge-status s-checked_out">Guest</span>{% endif %}
+        </td></tr>
+        {% if profile_user.profile.role == 'hotel_owner' %}
+        <tr><td style="padding:.5rem 0;color:var(--ink3);">Approval</td><td><span class="adm-badge-status s-{{ profile_user.profile.owner_approval_status }}">{{ profile_user.profile.get_owner_approval_status_display }}</span></td></tr>
+        {% endif %}
+      </table>
+    </div>
+    {% if hotels %}
+    <div class="adm-panel adm-panel-gold adm-panel-body">
+      <div class="adm-panel-title">Hotels ({{ hotels.count }})</div>
+      {% for h in hotels %}
+      <div style="display:flex;justify-content:space-between;padding:.5rem 0;border-bottom:1px solid rgba(255,255,255,.04);font-size:.8rem;">
+        <a href="{% url 'hotel_detail' h.slug %}" style="color:var(--gold);" target="_blank">{{ h.name }}</a>
+        <span style="color:var(--ink3);">{{ h.rooms.count }} rooms</span>
+      </div>
+      {% endfor %}
+    </div>
+    {% endif %}
+  </div>
+  <div class="col-md-8">
+    <div class="adm-table-wrap">
+      <div class="adm-table-head"><h6>Bookings ({{ bookings.count }})</h6></div>
+      <table class="adm-table">
+        <thead><tr><th>Ref</th><th>Hotel</th><th>Dates</th><th>Total</th><th>Status</th></tr></thead>
+        <tbody>
+          {% for b in bookings %}
+          <tr>
+            <td><code style="color:var(--gold);font-size:.72rem;">{{ b.booking_ref_short }}</code></td>
+            <td style="font-size:.8rem;">{{ b.room.hotel.name|truncatechars:25 }}</td>
+            <td style="font-size:.76rem;color:var(--ink3);">{{ b.check_in }} → {{ b.check_out }}</td>
+            <td style="color:var(--gold);font-weight:600;">${{ b.total_price }}</td>
+            <td><span class="adm-badge-status s-{{ b.status }}">{{ b.get_status_display }}</span></td>
+          </tr>
+          {% empty %}
+          <tr><td colspan="5" style="text-align:center;padding:2rem;color:var(--ink3);">No bookings</td></tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>
+{% endblock %}

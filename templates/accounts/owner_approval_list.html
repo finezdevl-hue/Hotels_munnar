@@ -1,0 +1,134 @@
+{% extends 'base.html' %}
+{% block title %}Hotel Owner Approvals — LuxeStay Admin{% endblock %}
+
+{% block extra_css %}
+<style>
+    .approval-card { border:1px solid #eee; padding:1.25rem; margin-bottom:0.75rem; border-left:4px solid; }
+    .approval-card.pending  { border-left-color: #ffc107; }
+    .approval-card.approved { border-left-color: #198754; }
+    .approval-card.rejected { border-left-color: #dc3545; }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="page-header">
+    <div class="container d-flex justify-content-between align-items-center">
+        <div>
+            <h2>Hotel Owner Approvals</h2>
+            <p class="filter-panel-title mb-0">Review and manage hotel owner applications</p>
+        </div>
+        {% if pending %}
+        <span class="badge bg-warning text-dark fs-6 px-3 py-2">{{ pending.count }} Pending</span>
+        {% endif %}
+    </div>
+</div>
+
+<div class="container my-4">
+
+    <!-- PENDING -->
+    <h5 class="mb-3" style="font-family:'Playfair Display',serif;">
+        <i class="bi bi-hourglass-split text-warning me-2"></i>Pending Applications ({{ pending.count }})
+    </h5>
+    {% if pending %}
+        {% for profile in pending %}
+        <div class="approval-card pending">
+            <div class="row align-items-center g-3">
+                <div class="col-md-5">
+                    <strong>{{ profile.user.get_full_name|default:profile.user.username }}</strong>
+                    <span class="filter-panel-title small ms-2">@{{ profile.user.username }}</span><br>
+                    <a href="mailto:{{ profile.user.email }}" class="small filter-panel-title">{{ profile.user.email }}</a>
+                    {% if profile.phone %}<br><span class="small filter-panel-title"><i class="bi bi-telephone me-1"></i>{{ profile.phone }}</span>{% endif %}
+                </div>
+                <div class="col-md-3 small filter-panel-title">
+                    {% if profile.owner_requested_at %}
+                    <i class="bi bi-calendar3 me-1"></i>Applied: {{ profile.owner_requested_at|date:"d M Y" }}<br>
+                    {% endif %}
+                    Member since: {{ profile.user.date_joined|date:"d M Y" }}
+                    {% if profile.country %}<br><i class="bi bi-geo-alt me-1"></i>{{ profile.country }}{% endif %}
+                </div>
+                <div class="col-md-4 d-flex gap-2 justify-content-md-end flex-wrap">
+                    <form method="post" action="{% url 'approve_owner' profile.id %}">
+                        {% csrf_token %}
+                        <button type="submit" class="btn btn-success btn-sm" style="border-radius:0;"
+                                onclick="return confirm('Approve {{ profile.user.username }} as hotel owner?')">
+                            <i class="bi bi-check-lg me-1"></i>Approve
+                        </button>
+                    </form>
+                    <a href="{% url 'reject_owner' profile.id %}" class="btn btn-outline-danger btn-sm" style="border-radius:0;">
+                        <i class="bi bi-x-lg me-1"></i>Reject
+                    </a>
+                </div>
+            </div>
+        </div>
+        {% endfor %}
+    {% else %}
+    <p class="filter-panel-title py-3"><i class="bi bi-check-circle me-2"></i>No pending applications.</p>
+    {% endif %}
+
+    <hr class="my-4">
+
+    <!-- APPROVED -->
+    <h5 class="mb-3" style="font-family:'Playfair Display',serif;">
+        <i class="bi bi-check-circle-fill text-success me-2"></i>Approved Owners ({{ approved.count }})
+    </h5>
+    {% if approved %}
+    <div class="table-responsive">
+        <table class="table table-sm align-middle">
+            <thead style="font-size:0.75rem; text-transform:uppercase; letter-spacing:1px;">
+                <tr><th>Name</th><th>Email</th><th>Hotels</th><th>Approved</th><th>Action</th></tr>
+            </thead>
+            <tbody>
+            {% for profile in approved %}
+            <tr>
+                <td><strong>{{ profile.user.get_full_name|default:profile.user.username }}</strong></td>
+                <td class="small filter-panel-title">{{ profile.user.email }}</td>
+                <td>{{ profile.user.hotels.count }}</td>
+                <td class="small filter-panel-title">{{ profile.owner_reviewed_at|date:"d M Y"|default:"—" }}</td>
+                <td>
+                    <a href="{% url 'reject_owner' profile.id %}" class="btn btn-outline-danger btn-sm" style="border-radius:0; font-size:0.7rem;">Revoke</a>
+                </td>
+            </tr>
+            {% endfor %}
+            </tbody>
+        </table>
+    </div>
+    {% else %}
+    <p class="filter-panel-title small">None yet.</p>
+    {% endif %}
+
+    <hr class="my-4">
+
+    <!-- REJECTED -->
+    <h5 class="mb-3" style="font-family:'Playfair Display',serif;">
+        <i class="bi bi-x-circle-fill text-danger me-2"></i>Rejected Applications ({{ rejected.count }})
+    </h5>
+    {% if rejected %}
+    <div class="table-responsive">
+        <table class="table table-sm align-middle">
+            <thead style="font-size:0.75rem; text-transform:uppercase; letter-spacing:1px;">
+                <tr><th>Name</th><th>Email</th><th>Reason</th><th>Rejected</th><th>Action</th></tr>
+            </thead>
+            <tbody>
+            {% for profile in rejected %}
+            <tr>
+                <td><strong>{{ profile.user.get_full_name|default:profile.user.username }}</strong></td>
+                <td class="small filter-panel-title">{{ profile.user.email }}</td>
+                <td class="small filter-panel-title">{{ profile.owner_rejection_reason|default:"—"|truncatechars:60 }}</td>
+                <td class="small filter-panel-title">{{ profile.owner_reviewed_at|date:"d M Y"|default:"—" }}</td>
+                <td>
+                    <form method="post" action="{% url 'approve_owner' profile.id %}">
+                        {% csrf_token %}
+                        <button type="submit" class="btn btn-success btn-sm" style="border-radius:0; font-size:0.7rem;">Re-approve</button>
+                    </form>
+                </td>
+            </tr>
+            {% endfor %}
+            </tbody>
+        </table>
+    </div>
+    {% else %}
+    <p class="filter-panel-title small">None.</p>
+    {% endif %}
+
+</div>
+{% endblock %}

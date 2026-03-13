@@ -1,0 +1,90 @@
+{% extends 'custom_admin/base.html' %}
+{% block title %}{% if hotel %}Edit Hotel{% else %}Add Hotel{% endif %} — Admin{% endblock %}
+{% block topbar_title %}{% if hotel %}Edit Hotel{% else %}Add Hotel{% endif %}{% endblock %}
+{% block nav_hotel_create %}{% if not hotel %}active{% endif %}{% endblock %}
+{% block nav_hotels %}{% if hotel %}active{% endif %}{% endblock %}
+
+{% block content %}
+<div class="adm-page-head">
+  <div><h2>{% if hotel %}Edit: {{ hotel.name }}{% else %}Add New Hotel{% endif %}</h2><p>{% if hotel %}Update hotel details{% else %}Create a new hotel listing{% endif %}</p></div>
+  <div class="d-flex gap-2">
+    <a href="{% url 'admin_hotels' %}" class="adm-btn adm-btn-ghost">← Back</a>
+    {% if hotel %}<a href="{% url 'hotel_detail' hotel.slug %}" class="adm-btn adm-btn-ghost" target="_blank"><i class="bi bi-eye me-1"></i>View Live</a>{% endif %}
+  </div>
+</div>
+
+<form method="post" enctype="multipart/form-data">
+  {% csrf_token %}
+  <div class="row g-3">
+    <div class="col-lg-8">
+      <div class="adm-panel adm-panel-gold adm-panel-body mb-3">
+        <div class="adm-panel-title"><i class="bi bi-info-circle" style="color:var(--gold);"></i>Basic Information</div>
+        <div class="row g-3">
+          <div class="col-md-8"><label class="adm-label">Hotel Name *</label><input type="text" name="name" class="adm-input" value="{{ form.name.value|default:'' }}" required placeholder="e.g. The Grand Palace">{% if form.name.errors %}<p style="color:var(--bad);font-size:.72rem;margin-top:3px;">{{ form.name.errors.0 }}</p>{% endif %}</div>
+          <div class="col-md-4"><label class="adm-label">Stars *</label><select name="stars" class="adm-select">{% for val,label in form.stars.field.choices %}<option value="{{ val }}" {% if form.stars.value|stringformat:"s" == val|stringformat:"s" %}selected{% endif %}>{{ label }}</option>{% endfor %}</select></div>
+          <div class="col-12"><label class="adm-label">Short Description *</label><input type="text" name="short_description" class="adm-input" value="{{ form.short_description.value|default:'' }}" placeholder="Brief summary shown in listings…"></div>
+          <div class="col-12"><label class="adm-label">Full Description *</label><textarea name="description" class="adm-textarea" rows="5" placeholder="Detailed hotel description…">{{ form.description.value|default:'' }}</textarea></div>
+        </div>
+      </div>
+
+      <div class="adm-panel adm-panel-gold adm-panel-body mb-3">
+        <div class="adm-panel-title"><i class="bi bi-geo-alt" style="color:var(--gold);"></i>Location</div>
+        <div class="row g-3">
+          <div class="col-12"><label class="adm-label">Street Address *</label><input type="text" name="address" class="adm-input" value="{{ form.address.value|default:'' }}" placeholder="123 Main Street"></div>
+          <div class="col-md-4"><label class="adm-label">City *</label><input type="text" name="city" class="adm-input" value="{{ form.city.value|default:'' }}"></div>
+          <div class="col-md-4"><label class="adm-label">Country *</label><input type="text" name="country" class="adm-input" value="{{ form.country.value|default:'' }}"></div>
+          <div class="col-md-4"><label class="adm-label">ZIP Code</label><input type="text" name="zip_code" class="adm-input" value="{{ form.zip_code.value|default:'' }}"></div>
+          <div class="col-md-6"><label class="adm-label">Latitude</label><input type="number" step="any" name="latitude" class="adm-input" value="{{ form.latitude.value|default:'' }}"></div>
+          <div class="col-md-6"><label class="adm-label">Longitude</label><input type="number" step="any" name="longitude" class="adm-input" value="{{ form.longitude.value|default:'' }}"></div>
+        </div>
+      </div>
+
+      <div class="adm-panel adm-panel-gold adm-panel-body mb-3">
+        <div class="adm-panel-title"><i class="bi bi-telephone" style="color:var(--gold);"></i>Contact</div>
+        <div class="row g-3">
+          <div class="col-md-4"><label class="adm-label">Phone *</label><input type="text" name="phone" class="adm-input" value="{{ form.phone.value|default:'' }}"></div>
+          <div class="col-md-4"><label class="adm-label">Email *</label><input type="email" name="email" class="adm-input" value="{{ form.email.value|default:'' }}"></div>
+          <div class="col-md-4"><label class="adm-label">Website</label><input type="url" name="website" class="adm-input" value="{{ form.website.value|default:'' }}" placeholder="https://…"></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="col-lg-4">
+      <div class="adm-panel adm-panel-gold adm-panel-body mb-3">
+        <div class="adm-panel-title"><i class="bi bi-sliders" style="color:var(--gold);"></i>Settings</div>
+        <div class="mb-3"><label class="adm-label">Hotel Owner</label>
+          <select name="owner" class="adm-select">{% for u in all_users %}<option value="{{ u.pk }}" {% if form.instance.owner_id == u.pk %}selected{% endif %}>{{ u.username }}</option>{% endfor %}</select>
+        </div>
+        <div class="mb-3"><label class="adm-label">Check-in Time</label><input type="time" name="check_in_time" class="adm-input" value="{{ form.check_in_time.value|default:'14:00' }}"></div>
+        <div class="mb-3"><label class="adm-label">Check-out Time</label><input type="time" name="check_out_time" class="adm-input" value="{{ form.check_out_time.value|default:'11:00' }}"></div>
+        <label style="display:flex;align-items:center;gap:.65rem;padding:.7rem;background:var(--bg3);border-radius:var(--r1);margin-bottom:.6rem;cursor:pointer;">
+          <input type="checkbox" name="is_active" {% if form.is_active.value %}checked{% endif %} style="width:15px;height:15px;accent-color:var(--gold);">
+          <span style="font-size:.82rem;color:var(--ink2);">Active — visible to guests</span>
+        </label>
+        <label style="display:flex;align-items:center;gap:.65rem;padding:.7rem;background:var(--bg3);border-radius:var(--r1);cursor:pointer;">
+          <input type="checkbox" name="is_featured" {% if form.is_featured.value %}checked{% endif %} style="width:15px;height:15px;accent-color:var(--gold);">
+          <span style="font-size:.82rem;color:var(--ink2);">Featured — show on homepage</span>
+        </label>
+      </div>
+
+      <div class="adm-panel adm-panel-gold adm-panel-body mb-3">
+        <div class="adm-panel-title"><i class="bi bi-tags" style="color:var(--gold);"></i>Amenities</div>
+        <div style="max-height:220px;overflow-y:auto;">
+          {% for amenity in all_amenities %}
+          <label style="display:flex;align-items:center;gap:.55rem;padding:.38rem 0;border-bottom:1px solid rgba(255,255,255,.04);cursor:pointer;">
+            <input type="checkbox" name="amenities" value="{{ amenity.pk }}" {% if amenity.pk in selected_amenities %}checked{% endif %} style="accent-color:var(--gold);width:14px;height:14px;">
+            <i class="{{ amenity.icon }}" style="color:var(--gold);font-size:.9rem;"></i>
+            <span style="font-size:.8rem;color:var(--ink2);">{{ amenity.name }}</span>
+          </label>
+          {% endfor %}
+        </div>
+      </div>
+
+      <div class="d-flex gap-2">
+        <button type="submit" class="adm-btn adm-btn-gold" style="flex:1;justify-content:center;padding:.75rem;"><i class="bi bi-check-lg me-1"></i>{% if hotel %}Save Changes{% else %}Create Hotel{% endif %}</button>
+        <a href="{% url 'admin_hotels' %}" class="adm-btn adm-btn-ghost" style="padding:.75rem 1rem;">Cancel</a>
+      </div>
+    </div>
+  </div>
+</form>
+{% endblock %}

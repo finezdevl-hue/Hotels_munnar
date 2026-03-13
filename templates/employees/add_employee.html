@@ -1,0 +1,86 @@
+{% extends 'base.html' %}
+{% block title %}Add Employee — {{ hotel.name }}{% endblock %}
+{% block content %}
+<div class="page-hero">
+  <div class="container">
+    <p class="eyebrow mb-1">{{ hotel.name }}</p>
+    <h1>Add Employee</h1>
+  </div>
+</div>
+<div class="container section-pad-sm">
+  <div class="row justify-content-center">
+    <div class="col-lg-8">
+      <form method="post">
+        {% csrf_token %}
+        <div class="form-section">
+          <div class="form-section-title"><i class="bi bi-person-plus"></i>Account Details</div>
+          <div class="row g-3">
+            <div class="col-md-6"><label class="form-label">First Name</label><input type="text" name="first_name" value="{{ post.first_name|default:'' }}" class="form-control" placeholder="Jane"></div>
+            <div class="col-md-6"><label class="form-label">Last Name</label><input type="text" name="last_name" value="{{ post.last_name|default:'' }}" class="form-control" placeholder="Smith"></div>
+            <div class="col-md-6"><label class="form-label">Username *</label><input type="text" name="username" value="{{ post.username|default:'' }}" class="form-control" placeholder="jane.smith" required></div>
+            <div class="col-md-6"><label class="form-label">Email</label><input type="email" name="email" value="{{ post.email|default:'' }}" class="form-control" placeholder="jane@hotel.com"></div>
+            <div class="col-md-6"><label class="form-label">Password *</label><input type="password" name="password" class="form-control" placeholder="Strong password" required></div>
+            <div class="col-md-6"><label class="form-label">Job Title</label><input type="text" name="job_title" value="{{ post.job_title|default:'Front Desk' }}" class="form-control" placeholder="e.g. Front Desk, Housekeeping"></div>
+          </div>
+        </div>
+
+        <div class="form-section">
+          <div class="form-section-title"><i class="bi bi-shield-check"></i>Access Permissions</div>
+          <p style="color:var(--ink-3);font-size:.83rem;margin-bottom:1.25rem;">Choose what this employee can see and do in the staff portal.</p>
+          <div style="display:flex;flex-direction:column;gap:.45rem;">
+
+            <div style="font-size:.62rem;letter-spacing:2px;text-transform:uppercase;color:var(--gold);font-weight:600;padding:.35rem 0 .15rem;">Bookings</div>
+            <label style="display:flex;align-items:center;gap:.75rem;padding:.65rem .9rem;background:var(--bg3);border-radius:var(--r2);border:1px solid rgba(255,255,255,.06);cursor:pointer;transition:border-color .15s;" onmouseover="this.style.borderColor='var(--gold-bd)'" onmouseout="if(!this.querySelector('input').checked)this.style.borderColor='rgba(255,255,255,.06)'">
+              <input type="checkbox" name="perm_view_bookings" checked style="width:15px;height:15px;accent-color:var(--gold);">
+              <div><div style="font-size:.83rem;color:var(--ink-2);font-weight:500;">View Bookings</div><div style="font-size:.71rem;color:var(--ink-3);">See all reservations for this hotel</div></div>
+            </label>
+            <label style="display:flex;align-items:center;gap:.75rem;padding:.65rem .9rem;background:var(--bg3);border-radius:var(--r2);border:1px solid rgba(255,255,255,.06);cursor:pointer;transition:border-color .15s;">
+              <input type="checkbox" name="perm_manage_bookings" style="width:15px;height:15px;accent-color:var(--gold);">
+              <div><div style="font-size:.83rem;color:var(--ink-2);font-weight:500;">Manage Bookings</div><div style="font-size:.71rem;color:var(--ink-3);">Update status (check-in, confirm, cancel)</div></div>
+            </label>
+
+            <div style="font-size:.62rem;letter-spacing:2px;text-transform:uppercase;color:var(--gold);font-weight:600;padding:.35rem 0 .15rem;margin-top:.3rem;">Rooms</div>
+            <label style="display:flex;align-items:center;gap:.75rem;padding:.65rem .9rem;background:var(--bg3);border-radius:var(--r2);border:1px solid rgba(255,255,255,.06);cursor:pointer;transition:border-color .15s;">
+              <input type="checkbox" name="perm_view_rooms" checked style="width:15px;height:15px;accent-color:var(--gold);">
+              <div><div style="font-size:.83rem;color:var(--ink-2);font-weight:500;">View Rooms</div><div style="font-size:.71rem;color:var(--ink-3);">See room listings and availability</div></div>
+            </label>
+            <label style="display:flex;align-items:center;gap:.75rem;padding:.65rem .9rem;background:var(--bg3);border-radius:var(--r2);border:1px solid rgba(255,255,255,.06);cursor:pointer;transition:border-color .15s;">
+              <input type="checkbox" name="perm_manage_rooms" style="width:15px;height:15px;accent-color:var(--gold);">
+              <div><div style="font-size:.83rem;color:var(--ink-2);font-weight:500;">Manage Rooms</div><div style="font-size:.71rem;color:var(--ink-3);">Add and edit room listings</div></div>
+            </label>
+
+            <div style="font-size:.62rem;letter-spacing:2px;text-transform:uppercase;color:var(--gold);font-weight:600;padding:.35rem 0 .15rem;margin-top:.3rem;">Guests & Reviews</div>
+            <label style="display:flex;align-items:center;gap:.75rem;padding:.65rem .9rem;background:var(--bg3);border-radius:var(--r2);border:1px solid rgba(255,255,255,.06);cursor:pointer;transition:border-color .15s;">
+              <input type="checkbox" name="perm_view_guests" checked style="width:15px;height:15px;accent-color:var(--gold);">
+              <div><div style="font-size:.83rem;color:var(--ink-2);font-weight:500;">View Guests</div><div style="font-size:.71rem;color:var(--ink-3);">Access guest list and contact details</div></div>
+            </label>
+            <label style="display:flex;align-items:center;gap:.75rem;padding:.65rem .9rem;background:var(--bg3);border-radius:var(--r2);border:1px solid rgba(255,255,255,.06);cursor:pointer;transition:border-color .15s;">
+              <input type="checkbox" name="perm_view_reviews" checked style="width:15px;height:15px;accent-color:var(--gold);">
+              <div><div style="font-size:.83rem;color:var(--ink-2);font-weight:500;">View Reviews</div><div style="font-size:.71rem;color:var(--ink-3);">Read guest reviews and ratings</div></div>
+            </label>
+            <label style="display:flex;align-items:center;gap:.75rem;padding:.65rem .9rem;background:var(--bg3);border-radius:var(--r2);border:1px solid rgba(255,255,255,.06);cursor:pointer;transition:border-color .15s;">
+              <input type="checkbox" name="perm_manage_reviews" style="width:15px;height:15px;accent-color:var(--gold);">
+              <div><div style="font-size:.83rem;color:var(--ink-2);font-weight:500;">Manage Reviews</div><div style="font-size:.71rem;color:var(--ink-3);">Delete inappropriate reviews</div></div>
+            </label>
+
+            <div style="font-size:.62rem;letter-spacing:2px;text-transform:uppercase;color:var(--gold);font-weight:600;padding:.35rem 0 .15rem;margin-top:.3rem;">Advanced</div>
+            <label style="display:flex;align-items:center;gap:.75rem;padding:.65rem .9rem;background:var(--bg3);border-radius:var(--r2);border:1px solid rgba(255,255,255,.06);cursor:pointer;transition:border-color .15s;">
+              <input type="checkbox" name="perm_edit_hotel" style="width:15px;height:15px;accent-color:var(--gold);">
+              <div><div style="font-size:.83rem;color:var(--ink-2);font-weight:500;">Edit Hotel Info</div><div style="font-size:.71rem;color:var(--ink-3);">Update hotel details and images</div></div>
+            </label>
+            <label style="display:flex;align-items:center;gap:.75rem;padding:.65rem .9rem;background:var(--bg3);border-radius:var(--r2);border:1px solid rgba(255,255,255,.06);cursor:pointer;transition:border-color .15s;">
+              <input type="checkbox" name="perm_manage_employees" style="width:15px;height:15px;accent-color:var(--gold);">
+              <div><div style="font-size:.83rem;color:var(--ink-2);font-weight:500;">Manage Employees</div><div style="font-size:.71rem;color:var(--ink-3);">Add and edit other staff members</div></div>
+            </label>
+          </div>
+        </div>
+
+        <div class="d-flex gap-3">
+          <button type="submit" class="btn-ls btn-gold" style="padding:.85rem 2.5rem;"><i class="bi bi-person-plus-fill me-2"></i>Create Employee</button>
+          <a href="{% url 'manage_employees' hotel.slug %}" class="btn-ls btn-dark" style="padding:.85rem 2rem;">Cancel</a>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+{% endblock %}

@@ -1,0 +1,24 @@
+{% extends 'base.html' %}
+{% block title %}Approval Pending — LuxeStay{% endblock %}
+{% block content %}
+<div style="min-height:80vh;background:var(--bg0);display:flex;align-items:center;padding:2rem;">
+  <div class="approval-panel">
+    <div class="approval-panel-head">
+      <i class="bi bi-hourglass-split" style="font-size:2.5rem;color:var(--gold);display:block;margin-bottom:1rem;"></i>
+      <h3 style="color:var(--ink);">Application Under Review</h3>
+      <p style="color:var(--ink-3);font-size:.88rem;margin:0;">Thank you for applying as a hotel owner</p>
+    </div>
+    <div class="approval-panel-body text-center">
+      <p style="color:var(--ink-2);line-height:1.8;">Your hotel owner application is currently being reviewed by our team. This typically takes 24–48 hours.</p>
+      <p style="color:var(--ink-3);font-size:.85rem;">You will be notified once your account has been approved and you can begin listing your properties.</p>
+      <div style="background:var(--gold-bg);border:1px solid var(--gold-bd);border-radius:var(--r2);padding:1rem;margin:1.5rem 0;font-size:.85rem;color:var(--gold);">
+        <i class="bi bi-info-circle me-2"></i>Status: <strong>Pending Review</strong>
+      </div>
+      <div class="d-flex gap-3 justify-content-center">
+        <a href="{% url 'home' %}" class="btn-ls btn-ghost">Return Home</a>
+        <a href="{% url 'logout' %}" class="btn-ls btn-dark">Sign Out</a>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

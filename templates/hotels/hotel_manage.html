@@ -1,0 +1,209 @@
+{% extends 'base.html' %}
+{% block title %}Manage {{ hotel.name }} — LuxeStay{% endblock %}
+
+{% block extra_css %}
+<style>
+    .manage-nav { background: #f8f8f8; border-bottom: 2px solid var(--gold); }
+    .manage-nav .nav-link { border-radius: 0; padding: 0.75rem 1.25rem; font-size: 0.85rem; letter-spacing: 1px; text-transform: uppercase; font-weight: 500; }
+    .manage-nav .nav-link.active { background: var(--gold); color: #000 !important; }
+    .img-thumb { width: 120px; height: 80px; object-fit: cover; border: 2px solid transparent; }
+    .img-thumb.main-img { border-color: var(--gold); }
+    .stat-card { background: var(--dark); color: white; padding: 1.5rem; border-top: 3px solid var(--gold); }
+    .stat-card .num { font-family: 'Playfair Display', serif; font-size: 2rem; color: var(--gold); }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="page-header">
+    <div class="container">
+        <div class="d-flex justify-content-between align-items-center">
+            <div>
+                <h2>{{ hotel.name }}</h2>
+                <p class="filter-panel-title mb-0"><i class="bi bi-geo-alt me-1"></i>{{ hotel.city }}, {{ hotel.country }}</p>
+            </div>
+            <div class="d-flex gap-2">
+                <a href="{% url 'hotel_detail' hotel.slug %}" class="btn btn-outline-gold" target="_blank">View Live</a>
+                <a href="{% url 'hotel_edit' hotel.slug %}" class="btn btn-gold">Edit Hotel</a>
+                <a href="{% url 'manage_employees' hotel.slug %}" class="btn-ls btn-ghost sm"><i class="bi bi-people me-1"></i>Employees</a>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- STATS -->
+<div class="bg-dark py-3 border-bottom border-secondary">
+    <div class="container">
+        <div class="row g-3">
+            <div class="col-md-3 col-6 text-center">
+                <div class="num text-gold" style="font-family:'Playfair Display',serif; font-size:1.8rem;">{{ rooms.count }}</div>
+                <div class="filter-panel-title small text-uppercase" style="letter-spacing:1px;">Rooms</div>
+            </div>
+            <div class="col-md-3 col-6 text-center">
+                <div class="num text-gold" style="font-family:'Playfair Display',serif; font-size:1.8rem;">{{ bookings.count }}</div>
+                <div class="filter-panel-title small text-uppercase" style="letter-spacing:1px;">Bookings</div>
+            </div>
+            <div class="col-md-3 col-6 text-center">
+                <div class="num text-gold" style="font-family:'Playfair Display',serif; font-size:1.8rem;">{{ images.count }}</div>
+                <div class="filter-panel-title small text-uppercase" style="letter-spacing:1px;">Photos</div>
+            </div>
+            <div class="col-md-3 col-6 text-center">
+                <div class="num text-gold" style="font-family:'Playfair Display',serif; font-size:1.8rem;">{{ hotel.reviews.count }}</div>
+                <div class="filter-panel-title small text-uppercase" style="letter-spacing:1px;">Reviews</div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="container my-4">
+    <div class="row g-4">
+
+        <!-- PHOTOS SECTION -->
+        <div class="col-12">
+            <div class="d-flex justify-content-between align-items-center mb-3">
+                <h5 style="font-family:'Playfair Display',serif;"><i class="bi bi-images me-2 text-gold"></i>Hotel Photos</h5>
+            </div>
+            
+            <!-- UPLOAD FORM -->
+            <div class="p-4 mb-3" style="background:#f9f9f9; border: 1px dashed #ccc;">
+                <form method="post" action="{% url 'upload_hotel_image' hotel.slug %}" enctype="multipart/form-data">
+                    {% csrf_token %}
+                    <div class="row g-3 align-items-end">
+                        <div class="col-md-5">
+                            <label class="form-label small filter-panel-title">Select Photo</label>
+                            <input type="file" name="image" class="form-control" accept="image/*" required>
+                        </div>
+                        <div class="col-md-4">
+                            <label class="form-label small filter-panel-title">Caption (optional)</label>
+                            <input type="text" name="caption" class="form-control" placeholder="Photo caption">
+                        </div>
+                        <div class="col-md-1 text-center">
+                            <div class="form-check">
+                                <input type="checkbox" name="is_main" class="form-check-input" id="isMain">
+                                <label class="form-check-label small" for="isMain">Main Photo</label>
+                            </div>
+                        </div>
+                        <div class="col-md-2">
+                            <button type="submit" class="btn btn-gold w-100"><i class="bi bi-cloud-upload me-1"></i>Upload</button>
+                        </div>
+                    </div>
+                </form>
+            </div>
+
+            <!-- EXISTING IMAGES -->
+            {% if images %}
+            <div class="row g-3">
+                {% for img in images %}
+                <div class="col-md-3 col-6">
+                    <div class="position-relative" style="border: {% if img.is_main %}2px solid var(--gold){% else %}1px solid #eee{% endif %};">
+                        <img src="{{ img.image.url }}" alt="{{ img.caption }}" class="w-100" style="height:150px; object-fit:cover; display:block;">
+                        {% if img.is_main %}
+                        <span style="position:absolute;top:8px;left:8px;" class="badge-gold">Main</span>
+                        {% endif %}
+                        <div class="p-2 d-flex justify-content-between align-items-center" style="background:#f9f9f9;">
+                            <span class="small filter-panel-title">{{ img.caption|default:"No caption" }}</span>
+                            <div class="d-flex gap-1">
+                                {% if not img.is_main %}
+                                <a href="{% url 'set_main_image' img.id %}" class="btn btn-sm btn-outline-warning" title="Set as main" style="border-radius:0; font-size:0.7rem; padding:2px 8px;">Main</a>
+                                {% endif %}
+                                <a href="{% url 'delete_hotel_image' img.id %}" class="btn btn-sm btn-outline-danger" title="Delete" style="border-radius:0;" onclick="return confirm('Delete this image?')"><i class="bi bi-trash"></i></a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+            {% else %}
+            <p class="filter-panel-title text-center py-4"><i class="bi bi-image display-4 d-block mb-2"></i>No photos uploaded yet</p>
+            {% endif %}
+        </div>
+
+        <!-- ROOMS SECTION -->
+        <div class="col-12">
+            <div class="d-flex justify-content-between align-items-center mb-3">
+                <h5 style="font-family:'Playfair Display',serif;"><i class="bi bi-door-open me-2 text-gold"></i>Rooms</h5>
+                <a href="{% url 'room_create' hotel.slug %}" class="btn btn-gold btn-sm"><i class="bi bi-plus me-1"></i>Add Room</a>
+            </div>
+            {% if rooms %}
+            <div class="table-responsive">
+                <table class="table table-hover align-middle">
+                    <thead style="background:#f5f5f5;">
+                        <tr>
+                            <th style="font-size:0.75rem;text-transform:uppercase;letter-spacing:1px;">Room</th>
+                            <th style="font-size:0.75rem;text-transform:uppercase;letter-spacing:1px;">Type</th>
+                            <th style="font-size:0.75rem;text-transform:uppercase;letter-spacing:1px;">Capacity</th>
+                            <th style="font-size:0.75rem;text-transform:uppercase;letter-spacing:1px;">Price/Night</th>
+                            <th style="font-size:0.75rem;text-transform:uppercase;letter-spacing:1px;">Status</th>
+                            <th style="font-size:0.75rem;text-transform:uppercase;letter-spacing:1px;">Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for room in rooms %}
+                        <tr>
+                            <td><strong>{{ room.name }}</strong><br><small class="filter-panel-title">#{{ room.room_number }}</small></td>
+                            <td>{{ room.room_type|default:"—" }}</td>
+                            <td><i class="bi bi-people me-1"></i>{{ room.capacity }}</td>
+                            <td class="text-gold fw-bold">${{ room.price_per_night }}</td>
+                            <td>
+                                {% if room.is_available %}
+                                <span class="badge bg-success" style="border-radius:0;">Available</span>
+                                {% else %}
+                                <span class="badge bg-secondary" style="border-radius:0;">Unavailable</span>
+                                {% endif %}
+                            </td>
+                            <td>
+                                <a href="{% url 'room_edit' room.id %}" class="btn btn-sm btn-outline-secondary me-1" style="border-radius:0;">Edit</a>
+                                <a href="{% url 'room_delete' room.id %}" class="btn btn-sm btn-outline-danger" style="border-radius:0;" onclick="return confirm('Delete this room?')">Delete</a>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+            {% else %}
+            <p class="filter-panel-title text-center py-4"><i class="bi bi-door-closed display-4 d-block mb-2"></i>No rooms added yet</p>
+            {% endif %}
+        </div>
+
+        <!-- RECENT BOOKINGS -->
+        <div class="col-12">
+            <div class="d-flex justify-content-between align-items-center mb-3">
+                <h5 style="font-family:'Playfair Display',serif;"><i class="bi bi-calendar-check me-2 text-gold"></i>Recent Bookings</h5>
+                <a href="{% url 'hotel_bookings' hotel.slug %}" class="btn btn-outline-dark btn-sm">View All</a>
+            </div>
+            {% if bookings %}
+            <div class="table-responsive">
+                <table class="table table-hover align-middle">
+                    <thead style="background:#f5f5f5;">
+                        <tr>
+                            <th style="font-size:0.75rem;text-transform:uppercase;letter-spacing:1px;">Ref</th>
+                            <th style="font-size:0.75rem;text-transform:uppercase;letter-spacing:1px;">Guest</th>
+                            <th style="font-size:0.75rem;text-transform:uppercase;letter-spacing:1px;">Room</th>
+                            <th style="font-size:0.75rem;text-transform:uppercase;letter-spacing:1px;">Dates</th>
+                            <th style="font-size:0.75rem;text-transform:uppercase;letter-spacing:1px;">Total</th>
+                            <th style="font-size:0.75rem;text-transform:uppercase;letter-spacing:1px;">Status</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for booking in bookings %}
+                        <tr>
+                            <td><code>{{ booking.booking_ref_short }}</code></td>
+                            <td>{{ booking.first_name }} {{ booking.last_name }}<br><small class="filter-panel-title">{{ booking.email }}</small></td>
+                            <td>{{ booking.room.name }}</td>
+                            <td class="small">{{ booking.check_in }} → {{ booking.check_out }}<br><small class="filter-panel-title">{{ booking.nights }} night{{ booking.nights|pluralize }}</small></td>
+                            <td class="text-gold fw-bold">${{ booking.total_price }}</td>
+                            <td>
+                                <span class="badge" style="border-radius:0; background:{% if booking.status == 'confirmed' %}#198754{% elif booking.status == 'cancelled' %}#dc3545{% elif booking.status == 'pending' %}#ffc107; color:#000{% else %}#0dcaf0{% endif %};">{{ booking.get_status_display }}</span>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+            {% else %}
+            <p class="filter-panel-title text-center py-4"><i class="bi bi-calendar-x display-4 d-block mb-2"></i>No bookings yet</p>
+            {% endif %}
+        </div>
+
+    </div>
+</div>
+{% endblock %}

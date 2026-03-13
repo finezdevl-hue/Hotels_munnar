@@ -1,0 +1,159 @@
+{% extends 'base.html' %}
+{% block title %}{{ title }} — LuxeStay{% endblock %}
+
+{% block content %}
+<div class="page-header">
+    <div class="container">
+        <h2>{{ title }}</h2>
+        <p class=" mb-0">Fill in your hotel details below</p>
+    </div>
+</div>
+
+<div class="container my-5">
+    <div class="row justify-content-center">
+        <div class="col-lg-10">
+            <form method="post" enctype="multipart/form-data">
+                {% csrf_token %}
+
+                <!-- Basic Info -->
+                <div class="p-4 mb-4" style="border: 1px solid #eee; border-top: 3px solid var(--gold);">
+                    <h5 class="mb-4" style="font-family:'Playfair Display',serif;">Basic Information</h5>
+                    <div class="row g-3">
+                        <div class="col-md-8">
+                            <label class="filter-panel-title">Hotel Name *</label>
+                            {{ form.name }}
+                        </div>
+                        <div class="col-md-4">
+                            <label class="filter-panel-title">Star Rating *</label>
+                            {{ form.stars }}
+                        </div>
+                        <div class="col-12">
+                            <label class="filter-panel-title">Short Description *</label>
+                            {{ form.short_description }}
+                        </div>
+                        <div class="col-12">
+                            <label class="filter-panel-title">Full Description *</label>
+                            {{ form.description }}
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Location -->
+                <div class="p-4 mb-4" style="border: 1px solid #eee; border-top: 3px solid var(--gold);">
+                    <h5 class="mb-4" style="font-family:'Playfair Display',serif;">Location</h5>
+                    <div class="row g-3">
+                        <div class="col-12">
+                            <label class="filter-panel-title ">Street Address *</label>
+                            {{ form.address }}
+                        </div>
+                        <div class="col-md-4">
+                            <label class="filter-panel-title">City *</label>
+                            {{ form.city }}
+                        </div>
+                        <div class="col-md-4">
+                            <label class="filter-panel-title ">Country *</label>
+                            {{ form.country }}
+                        </div>
+                        <div class="col-md-4">
+                            <label class="filter-panel-title">ZIP Code</label>
+                            {{ form.zip_code }}
+                        </div>
+                        <div class="col-md-6">
+                            <label class="filter-panel-title">Latitude (optional)</label>
+                            {{ form.latitude }}
+                        </div>
+                        <div class="col-md-6">
+                            <label class="filter-panel-title">Longitude (optional)</label>
+                            {{ form.longitude }}
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Contact -->
+                <div class="p-4 mb-4" style="border: 1px solid #eee; border-top: 3px solid var(--gold);">
+                    <h5 class="mb-4" style="font-family:'Playfair Display',serif;">Contact Information</h5>
+                    <div class="row g-3">
+                        <div class="col-md-4">
+                            <label class="filter-panel-title">Phone *</label>
+                            {{ form.phone }}
+                        </div>
+                        <div class="col-md-4">
+                            <label class="filter-panel-title">Email *</label>
+                            {{ form.email }}
+                        </div>
+                        <div class="col-md-4">
+                            <label class="filter-panel-title">Website</label>
+                            {{ form.website }}
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Policies -->
+                <div class="p-4 mb-4" style="border: 1px solid #eee; border-top: 3px solid var(--gold);">
+                    <h5 class="mb-4" style="font-family:'Playfair Display',serif;">Policies & Amenities</h5>
+                    <div class="row g-3">
+                        <div class="col-md-6">
+                            <label class="filter-panel-title">Check-in Time</label>
+                            {{ form.check_in_time }}
+                        </div>
+                        <div class="col-md-6">
+                            <label class="filter-panel-title">Check-out Time</label>
+                            {{ form.check_out_time }}
+                        </div>
+                        <div class="col-12">
+                            <label class="filter-panel-title">Amenities</label>
+                            <div class="row g-2 mt-1">
+                                {% for choice in form.amenities %}
+                                <div class="col-md-3 col-6">
+                                    <div class="form-check">
+                                        {{ choice.tag }}
+                                        <label class="form-check-label small" for="{{ choice.id_for_label }}">{{ choice.choice_label }}</label>
+                                    </div>
+                                </div>
+                                {% endfor %}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Settings -->
+                <div class="p-4 mb-4" style="border: 1px solid #eee; border-top: 3px solid var(--gold);">
+                    <h5 class="mb-4" style="font-family:'Playfair Display',serif;">Visibility Settings</h5>
+                    <div class="row g-3">
+                        <div class="col-md-6">
+                            <div class="form-check">
+                                {{ form.is_active }}
+                                <label class="filter-panel-title" for="{{ form.is_active.id_for_label }}">
+                                    <strong>Active</strong> — Hotel is visible to guests
+                                </label>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="form-check">
+                                {{ form.is_featured }}
+                                <label class="filter-panel-title" for="{{ form.is_featured.id_for_label }}">
+                                    <strong>Featured</strong> — Show on homepage
+                                </label>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                {% if form.errors %}
+                <div class="alert alert-danger">
+                    Please correct the errors below:
+                    {{ form.errors }}
+                </div>
+                {% endif %}
+
+                <div class="d-flex gap-3">
+                    <button type="submit" class="btn btn-gold px-5 py-3">
+                        <i class="bi bi-check-lg me-2"></i>{{ title }}
+                    </button>
+                    <a href="{% url 'hotel_dashboard' %}" class="btn btn-outline-secondary px-4">Cancel</a>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %}

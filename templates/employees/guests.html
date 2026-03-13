@@ -1,0 +1,39 @@
+{% extends 'employees/base.html' %}
+{% block title %}Guests{% endblock %}
+{% block topbar_title %}Guests{% endblock %}
+{% block nav_guests %}active{% endblock %}
+{% block content %}
+<div class="sp-page-head">
+  <div><h2>Guests</h2><p>{{ hotel.name }} · {{ guests.paginator.count }} unique guest{{ guests.paginator.count|pluralize }}</p></div>
+</div>
+<div class="sp-panel sp-panel-body mb-3">
+  <form method="get" style="display:flex;gap:.75rem;flex-wrap:wrap;align-items:flex-end;">
+    <div><label class="sp-label">Search</label><input type="text" name="q" value="{{ request.GET.q }}" class="sp-input" placeholder="Name or email…" style="width:220px;"></div>
+    <button type="submit" class="sp-btn sb-primary">Search</button>
+    <a href="{% url 'employee_guests' %}" class="sp-btn sb-ghost">Reset</a>
+  </form>
+</div>
+<div class="sp-table-wrap">
+  <table class="sp-table">
+    <thead><tr><th>Guest</th><th>Email</th><th>Bookings at Hotel</th><th>Joined</th></tr></thead>
+    <tbody>
+      {% for g in guests %}
+      <tr>
+        <td><div style="display:flex;align-items:center;gap:.6rem;"><div style="width:32px;height:32px;border-radius:50%;background:var(--gold-bg);border:1px solid var(--gold-bd);display:flex;align-items:center;justify-content:center;font-family:'Cormorant Garamond',serif;font-size:.9rem;color:var(--gold);flex-shrink:0;">{{ g.first_name.0|default:g.username.0|upper }}</div><div style="font-weight:500;font-size:.83rem;color:var(--ink);">{{ g.get_full_name|default:g.username }}</div></div></td>
+        <td style="font-size:.8rem;color:var(--ink3);">{{ g.email }}</td>
+        <td style="text-align:center;">{{ g.bookings.filter.count|default:g.bookings.all.count }}</td>
+        <td style="font-size:.76rem;color:var(--ink3);">{{ g.date_joined|date:"d M Y" }}</td>
+      </tr>
+      {% empty %}
+      <tr><td colspan="4" style="text-align:center;padding:3rem;color:var(--ink3);">No guests yet</td></tr>
+      {% endfor %}
+    </tbody>
+  </table>
+  {% if guests.has_other_pages %}
+  <div style="padding:.75rem 1.4rem;border-top:1px solid rgba(255,255,255,.05);display:flex;gap:.5rem;">
+    {% if guests.has_previous %}<a href="?page={{ guests.previous_page_number }}" class="sp-btn sb-ghost" style="font-size:.68rem;padding:.3rem .7rem;">← Prev</a>{% endif %}
+    {% if guests.has_next %}<a href="?page={{ guests.next_page_number }}" class="sp-btn sb-ghost" style="font-size:.68rem;padding:.3rem .7rem;">Next →</a>{% endif %}
+  </div>
+  {% endif %}
+</div>
+{% endblock %}

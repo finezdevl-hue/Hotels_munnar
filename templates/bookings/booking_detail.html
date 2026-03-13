@@ -1,0 +1,84 @@
+{% extends 'base.html' %}
+{% block title %}Booking {{ booking.booking_ref_short }} — LuxeStay{% endblock %}
+
+{% block content %}
+<div class="page-header">
+    <div class="container">
+        <h2><i class="bi bi-check-circle-fill text-success me-2"></i>Booking Confirmed</h2>
+        <p class="filter-panel-title mb-0">Reference: <code class="text-gold fs-5">{{ booking.booking_ref_short }}</code></p>
+    </div>
+</div>
+
+<div class="container my-5">
+    <div class="row justify-content-center">
+        <div class="col-lg-8">
+            <div style="border:1px solid #eee; border-top:4px solid var(--gold);">
+                <div class="p-4 border-bottom">
+                    <div class="row g-3">
+                        <div class="col-md-6">
+                            <p class="filter-panel-title small mb-1">Hotel</p>
+                            <h5 style="font-family:'Playfair Display',serif;">{{ booking.room.hotel.name }}</h5>
+                            <p class="small filter-panel-title"><i class="bi bi-geo-alt me-1"></i>{{ booking.room.hotel.city }}, {{ booking.room.hotel.country }}</p>
+                        </div>
+                        <div class="col-md-6">
+                            <p class="filter-panel-title small mb-1">Room</p>
+                            <h5>{{ booking.room.name }}</h5>
+                            <p class="small filter-panel-title"><i class="bi bi-moon me-1"></i>{{ booking.room.bed_type }}</p>
+                        </div>
+                        <div class="col-md-6">
+                            <p class="filter-panel-title small mb-1">Check-in</p>
+                            <strong>{{ booking.check_in|date:"D, d M Y" }}</strong>
+                            <p class="small filter-panel-title">After {{ booking.room.hotel.check_in_time|time:"g:i A" }}</p>
+                        </div>
+                        <div class="col-md-6">
+                            <p class="filter-panel-title small mb-1">Check-out</p>
+                            <strong>{{ booking.check_out|date:"D, d M Y" }}</strong>
+                            <p class="small filter-panel-title">Before {{ booking.room.hotel.check_out_time|time:"g:i A" }}</p>
+                        </div>
+                        <div class="col-md-6">
+                            <p class="filter-panel-title small mb-1">Duration</p>
+                            <strong>{{ booking.nights }} Night{{ booking.nights|pluralize }}</strong>
+                        </div>
+                        <div class="col-md-6">
+                            <p class="filter-panel-title small mb-1">Guests</p>
+                            <strong>{{ booking.guests }} Guest{{ booking.guests|pluralize }}</strong>
+                        </div>
+                    </div>
+                </div>
+                <div class="p-4 border-bottom">
+                    <h6 class="mb-3">Guest Information</h6>
+                    <div class="row g-2" style="font-size:0.9rem;">
+                        <div class="col-md-6"><span class="filter-panel-title">Name:</span> {{ booking.first_name }} {{ booking.last_name }}</div>
+                        <div class="col-md-6"><span class="filter-panel-title">Email:</span> {{ booking.email }}</div>
+                        <div class="col-md-6"><span class="filter-panel-title">Phone:</span> {{ booking.phone }}</div>
+                        {% if booking.special_requests %}
+                        <div class="col-12"><span class="filter-panel-title">Special Requests:</span> {{ booking.special_requests }}</div>
+                        {% endif %}
+                    </div>
+                </div>
+                <div class="p-4 border-bottom d-flex justify-content-between align-items-center">
+                    <div>
+                        <p class="filter-panel-title small mb-1">Status</p>
+                        <span class="badge px-3 py-2" style="border-radius:0; font-size:0.85rem; background:{% if booking.status == 'confirmed' %}#198754{% elif booking.status == 'cancelled' %}#dc3545{% elif booking.status == 'pending' %}#ffc107; color:#000{% else %}#0dcaf0{% endif %}">
+                            {{ booking.get_status_display }}
+                        </span>
+                    </div>
+                    <div class="text-end">
+                        <p class="filter-panel-title small mb-1">Total Price</p>
+                        <span style="font-family:'Playfair Display',serif; font-size:2rem; color:var(--gold);">${{ booking.total_price }}</span>
+                    </div>
+                </div>
+                <div class="p-4 d-flex gap-3 flex-wrap">
+                    <a href="{% url 'my_bookings' %}" class="btn btn-gold">View All Bookings</a>
+                    <a href="{% url 'hotel_detail' booking.room.hotel.slug %}" class="btn btn-outline-secondary">Back to Hotel</a>
+                    {% if booking.status in 'pending,confirmed' %}
+                    <a href="{% url 'cancel_booking' booking.pk %}" class="btn btn-outline-danger ms-auto" onclick="return confirm('Are you sure you want to cancel this booking?')">
+                        <i class="bi bi-x-circle me-1"></i>Cancel Booking
+                    </a>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,64 @@
+{% extends 'base.html' %}
+{% block title %}Hotel Dashboard — LuxeStay{% endblock %}
+{% block content %}
+<div class="page-hero">
+  <div class="container">
+    <p class="eyebrow mb-2">Hotel Owner</p>
+    <h1>My Hotels</h1>
+  </div>
+</div>
+<div class="container section-pad-sm">
+  <div class="d-flex justify-content-between align-items-center mb-4 flex-wrap gap-3">
+    <p style="color:var(--ink-3);margin:0;">{{ hotels.count }} hotel{{ hotels.count|pluralize }} listed</p>
+    <a href="{% url 'hotel_create' %}" class="btn-ls btn-gold"><i class="bi bi-plus-lg me-2"></i>Add Hotel</a>
+  </div>
+  {% if hotels %}
+  <div class="row g-4">
+    {% for hotel in hotels %}
+    <div class="col-lg-4 col-md-6">
+      <div class="ls-panel ls-panel-gold overflow-hidden hover-lift">
+        {% with hotel.get_main_image as img %}
+        <img src="{% if img %}{{ img.image.url }}{% else %}https://images.unsplash.com/photo-1571003123894-1f0594d2b5d9?w=500&q=80{% endif %}" alt="{{ hotel.name }}" style="width:100%;height:180px;object-fit:cover;display:block;">
+        {% endwith %}
+        <div class="p-4">
+          <div class="d-flex justify-content-between align-items-start mb-2">
+            <div>
+              <div class="hotel-stars" style="font-size:.68rem;margin-bottom:.2rem;">{% for i in "12345" %}{% if forloop.counter <= hotel.stars %}★{% endif %}{% endfor %}</div>
+              <h5 style="font-family:'Cormorant Garamond',serif;color:var(--ink);margin:0;">{{ hotel.name }}</h5>
+            </div>
+            <span class="badge-ls {% if hotel.is_active %}badge-ok{% else %}badge-bad{% endif %}">{% if hotel.is_active %}Active{% else %}Inactive{% endif %}</span>
+          </div>
+          <p style="color:var(--ink-3);font-size:.8rem;margin-bottom:1rem;"><i class="bi bi-geo-alt me-1"></i>{{ hotel.city }}, {{ hotel.country }}</p>
+          <div class="row g-2 mb-3 text-center">
+            <div class="col-4" style="background:var(--bg3);border-radius:var(--r1);padding:.6rem;">
+              <div style="font-family:'Cormorant Garamond',serif;font-size:1.4rem;color:var(--gold);font-weight:700;line-height:1;">{{ hotel.rooms.count }}</div>
+              <div style="font-size:.62rem;letter-spacing:1.5px;text-transform:uppercase;color:var(--ink-3);">Rooms</div>
+            </div>
+            <div class="col-4" style="background:var(--bg3);border-radius:var(--r1);padding:.6rem;">
+              <div style="font-family:'Cormorant Garamond',serif;font-size:1.4rem;color:var(--gold);font-weight:700;line-height:1;">{{ hotel.get_booking_count }}</div>
+              <div style="font-size:.62rem;letter-spacing:1.5px;text-transform:uppercase;color:var(--ink-3);">Bookings</div>
+            </div>
+            <div class="col-4" style="background:var(--bg3);border-radius:var(--r1);padding:.6rem;">
+              <div style="font-family:'Cormorant Garamond',serif;font-size:1.4rem;color:var(--gold);font-weight:700;line-height:1;">{{ hotel.get_average_rating|default:"—" }}</div>
+              <div style="font-size:.62rem;letter-spacing:1.5px;text-transform:uppercase;color:var(--ink-3);">Rating</div>
+            </div>
+          </div>
+          <div class="d-flex gap-2">
+            <a href="{% url 'hotel_manage' hotel.slug %}" class="btn-ls btn-gold sm flex-grow-1 justify-content-center"><i class="bi bi-gear me-1"></i>Manage</a>
+            <a href="{% url 'hotel_detail' hotel.slug %}" class="btn-ls btn-dark sm" target="_blank"><i class="bi bi-eye"></i></a>
+          </div>
+        </div>
+      </div>
+    </div>
+    {% endfor %}
+  </div>
+  {% else %}
+  <div style="text-align:center;padding:5rem 2rem;background:var(--bg2);border:1px solid rgba(255,255,255,.055);border-radius:var(--r3);">
+    <i class="bi bi-building" style="font-size:2.5rem;color:var(--ink-3);display:block;margin-bottom:1rem;"></i>
+    <h5 style="font-family:'Cormorant Garamond',serif;color:var(--ink);">No hotels yet</h5>
+    <p style="color:var(--ink-3);font-size:.88rem;">Create your first hotel listing to start accepting bookings.</p>
+    <a href="{% url 'hotel_create' %}" class="btn-ls btn-gold mt-2"><i class="bi bi-plus-lg me-2"></i>Add Your First Hotel</a>
+  </div>
+  {% endif %}
+</div>
+{% endblock %}

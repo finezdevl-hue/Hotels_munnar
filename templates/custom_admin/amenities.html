@@ -1,0 +1,65 @@
+{% extends 'custom_admin/base.html' %}
+{% block title %}Amenities — Admin{% endblock %}
+{% block topbar_title %}Amenities & Room Types{% endblock %}
+{% block nav_amenities %}active{% endblock %}
+
+{% block content %}
+<div class="adm-page-head"><h2>Amenities & Room Types</h2></div>
+<div class="row g-4">
+  <div class="col-lg-6">
+    <div class="adm-table-wrap">
+      <div class="adm-table-head"><h6>Amenities ({{ amenities.count }})</h6></div>
+      <div style="padding:1rem 1.5rem;border-bottom:1px solid rgba(255,255,255,.05);background:var(--bg3);">
+        <form method="post" action="{% url 'admin_amenity_create' %}" class="d-flex gap-2">
+          {% csrf_token %}
+          <input type="text" name="name" class="adm-input" placeholder="Amenity name (e.g. Free WiFi)" required style="flex:1;">
+          <input type="text" name="icon" class="adm-input" placeholder="bi-wifi" style="width:130px;">
+          <button type="submit" class="adm-btn adm-btn-gold" style="flex-shrink:0;"><i class="bi bi-plus"></i></button>
+        </form>
+        <p style="font-size:.68rem;color:var(--ink3);margin:.5rem 0 0;">Icon: Bootstrap Icons class e.g. bi-wifi, bi-water, bi-cup-hot</p>
+      </div>
+      <table class="adm-table">
+        <thead><tr><th>Icon</th><th>Name</th><th>Used By</th><th></th></tr></thead>
+        <tbody>
+          {% for a in amenities %}
+          <tr>
+            <td><i class="{{ a.icon }}" style="color:var(--gold);font-size:1.1rem;"></i></td>
+            <td style="font-weight:500;font-size:.83rem;color:var(--ink);">{{ a.name }}</td>
+            <td style="color:var(--ink3);font-size:.78rem;">{{ a.hotel_set.count }} hotel{{ a.hotel_set.count|pluralize }}</td>
+            <td><a href="{% url 'admin_amenity_delete' a.pk %}" class="adm-btn adm-btn-bad" style="padding:.28rem .5rem;font-size:.7rem;" onclick="return confirm('Delete {{ a.name }}?')"><i class="bi bi-trash"></i></a></td>
+          </tr>
+          {% empty %}
+          <tr><td colspan="4" style="text-align:center;padding:2rem;color:var(--ink3);">No amenities yet</td></tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </div>
+  <div class="col-lg-6">
+    <div class="adm-table-wrap">
+      <div class="adm-table-head"><h6>Room Types ({{ room_types.count }})</h6></div>
+      <div style="padding:1rem 1.5rem;border-bottom:1px solid rgba(255,255,255,.05);background:var(--bg3);">
+        <form method="post" action="{% url 'admin_room_type_create' %}" class="d-flex gap-2">
+          {% csrf_token %}
+          <input type="text" name="name" class="adm-input" placeholder="Room type (e.g. Deluxe Suite)" required style="flex:1;">
+          <button type="submit" class="adm-btn adm-btn-gold" style="flex-shrink:0;"><i class="bi bi-plus"></i></button>
+        </form>
+      </div>
+      <table class="adm-table">
+        <thead><tr><th>Name</th><th>Rooms Using</th><th></th></tr></thead>
+        <tbody>
+          {% for rt in room_types %}
+          <tr>
+            <td style="font-weight:500;font-size:.83rem;color:var(--ink);">{{ rt.name }}</td>
+            <td style="color:var(--ink3);font-size:.78rem;">{{ rt.room_set.count }} room{{ rt.room_set.count|pluralize }}</td>
+            <td><a href="{% url 'admin_room_type_delete' rt.pk %}" class="adm-btn adm-btn-bad" style="padding:.28rem .5rem;font-size:.7rem;" onclick="return confirm('Delete {{ rt.name }}?')"><i class="bi bi-trash"></i></a></td>
+          </tr>
+          {% empty %}
+          <tr><td colspan="3" style="text-align:center;padding:2rem;color:var(--ink3);">No room types yet</td></tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>
+{% endblock %}

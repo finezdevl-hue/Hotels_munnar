@@ -1,0 +1,80 @@
+{% extends 'custom_admin/base.html' %}
+{% block title %}Hotels — Admin{% endblock %}
+{% block topbar_title %}Hotels{% endblock %}
+{% block nav_hotels %}active{% endblock %}
+
+{% block content %}
+<div class="adm-page-head">
+  <div><h2>Hotels</h2><p>{{ hotels.paginator.count }} hotel{{ hotels.paginator.count|pluralize }} total</p></div>
+  <a href="{% url 'admin_hotel_create' %}" class="adm-btn adm-btn-gold"><i class="bi bi-plus-lg"></i>Add Hotel</a>
+</div>
+
+<!-- FILTERS -->
+<div class="adm-panel adm-panel-body mb-4">
+  <form method="get" class="d-flex gap-3 flex-wrap align-items-end">
+    <div><label class="adm-label">Search</label><input type="text" name="q" value="{{ request.GET.q }}" class="adm-input" placeholder="Name or city…" style="width:200px;"></div>
+    <div><label class="adm-label">Stars</label>
+      <select name="stars" class="adm-select" style="width:120px;">
+        <option value="">Any</option>
+        {% for i in "12345" %}<option value="{{ i }}" {% if request.GET.stars == i %}selected{% endif %}>{{ i }} Star</option>{% endfor %}
+      </select>
+    </div>
+    <div><label class="adm-label">Status</label>
+      <select name="status" class="adm-select" style="width:120px;">
+        <option value="">All</option>
+        <option value="active" {% if request.GET.status == 'active' %}selected{% endif %}>Active</option>
+        <option value="inactive" {% if request.GET.status == 'inactive' %}selected{% endif %}>Inactive</option>
+        <option value="featured" {% if request.GET.status == 'featured' %}selected{% endif %}>Featured</option>
+      </select>
+    </div>
+    <button type="submit" class="adm-btn adm-btn-gold">Filter</button>
+    <a href="{% url 'admin_hotels' %}" class="adm-btn adm-btn-ghost">Reset</a>
+  </form>
+</div>
+
+<div class="adm-table-wrap">
+  <table class="adm-table">
+    <thead><tr><th>Hotel</th><th>Owner</th><th>Location</th><th>Stars</th><th>Rooms</th><th>Bookings</th><th>Status</th><th>Actions</th></tr></thead>
+    <tbody>
+      {% for hotel in hotels %}
+      <tr>
+        <td>
+          <div style="display:flex;align-items:center;gap:.75rem;">
+            {% with hotel.get_main_image as img %}
+            {% if img %}<img src="{{ img.image.url }}" style="width:40px;height:40px;object-fit:cover;border-radius:var(--r2);border:1px solid rgba(255,255,255,.07);">
+            {% else %}<div style="width:40px;height:40px;background:var(--bg3);border-radius:var(--r2);border:1px solid rgba(255,255,255,.07);display:flex;align-items:center;justify-content:center;color:var(--ink3);"><i class="bi bi-building"></i></div>{% endif %}
+            {% endwith %}
+            <div><div style="font-weight:500;color:var(--ink);">{{ hotel.name }}</div><div style="font-size:.7rem;color:var(--ink3);">{{ hotel.rooms.count }} room{{ hotel.rooms.count|pluralize }}</div></div>
+          </div>
+        </td>
+        <td style="font-size:.8rem;">{{ hotel.owner.get_full_name|default:hotel.owner.username }}<br><span style="color:var(--ink3);font-size:.7rem;">{{ hotel.owner.email }}</span></td>
+        <td style="font-size:.8rem;color:var(--ink3);">{{ hotel.city }}, {{ hotel.country }}</td>
+        <td style="color:var(--gold);font-size:.8rem;">{% for i in "12345" %}{% if forloop.counter <= hotel.stars %}★{% endif %}{% endfor %}</td>
+        <td style="text-align:center;">{{ hotel.rooms.count }}</td>
+        <td style="text-align:center;">{{ hotel.booking_count }}</td>
+        <td>
+          {% if hotel.is_featured %}<span class="adm-badge-status s-active" style="display:block;margin-bottom:3px;">Featured</span>{% endif %}
+          <span class="adm-badge-status {% if hotel.is_active %}s-approved{% else %}s-cancelled{% endif %}">{% if hotel.is_active %}Active{% else %}Inactive{% endif %}</span>
+        </td>
+        <td>
+          <div class="d-flex gap-1">
+            <a href="{% url 'hotel_detail' hotel.slug %}" class="adm-btn adm-btn-ghost" style="padding:.3rem .55rem;font-size:.72rem;" target="_blank" title="View"><i class="bi bi-eye"></i></a>
+            <a href="{% url 'admin_hotel_edit' hotel.slug %}" class="adm-btn adm-btn-ghost" style="padding:.3rem .55rem;font-size:.72rem;" title="Edit"><i class="bi bi-pencil"></i></a>
+            <a href="{% url 'admin_hotel_toggle' hotel.slug %}" class="adm-btn adm-btn-ghost" style="padding:.3rem .55rem;font-size:.72rem;" title="Toggle"><i class="bi bi-toggle-{% if hotel.is_active %}on" style="color:var(--ok);{% else %}off{% endif %}"></i></a>
+          </div>
+        </td>
+      </tr>
+      {% empty %}
+      <tr><td colspan="8" style="text-align:center;padding:3rem;color:var(--ink3);"><i class="bi bi-building" style="font-size:2rem;display:block;margin-bottom:.5rem;"></i>No hotels found</td></tr>
+      {% endfor %}
+    </tbody>
+  </table>
+  {% if hotels.has_other_pages %}
+  <div style="padding:1rem 1.5rem;border-top:1px solid rgba(255,255,255,.05);display:flex;gap:.5rem;align-items:center;">
+    <span style="font-size:.78rem;color:var(--ink3);margin-right:auto;">Page {{ hotels.number }} of {{ hotels.paginator.num_pages }}</span>
+    {% if hotels.has_previous %}<a href="?page={{ hotels.previous_page_number }}" class="adm-btn adm-btn-ghost" style="font-size:.72rem;padding:.35rem .75rem;">← Prev</a>{% endif %}
+    {% if hotels.has_next %}<a href="?page={{ hotels.next_page_number }}" class="adm-btn adm-btn-ghost" style="font-size:.72rem;padding:.35rem .75rem;">Next →</a>{% endif %}
+  </div>
+  {% endif %}
+</div>
+{% endblock %}

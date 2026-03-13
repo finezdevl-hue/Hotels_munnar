@@ -1,0 +1,60 @@
+{% extends 'base.html' %}
+{% block title %}Profile — LuxeStay{% endblock %}
+{% block content %}
+<div class="page-hero">
+  <div class="container">
+    <p class="eyebrow mb-2">Account</p>
+    <h1>Your Profile</h1>
+  </div>
+</div>
+<div class="container section-pad-sm">
+  <div class="row g-4 justify-content-center">
+    <div class="col-lg-3">
+      <div class="ls-panel p-4 text-center mb-3">
+        <div style="width:80px;height:80px;border-radius:50%;background:var(--gold-bg);border:2px solid var(--gold-bd);display:flex;align-items:center;justify-content:center;margin:0 auto 1rem;font-family:'Cormorant Garamond',serif;font-size:2.2rem;color:var(--gold);">
+          {% if user.profile.avatar %}<img src="{{ user.profile.avatar.url }}" style="width:100%;height:100%;object-fit:cover;border-radius:50%;">
+          {% else %}{{ user.first_name.0|default:user.username.0|upper }}{% endif %}
+        </div>
+        <h5 style="font-family:'Cormorant Garamond',serif;color:var(--ink);margin-bottom:.25rem;">{{ user.get_full_name|default:user.username }}</h5>
+        <p style="color:var(--ink-3);font-size:.8rem;margin-bottom:1rem;">@{{ user.username }}</p>
+        <span class="badge-ls badge-gold">{% if user.is_staff %}Administrator{% elif user.profile.role == 'hotel_owner' %}Hotel Owner{% else %}Traveller{% endif %}</span>
+        {% if user.profile.role == 'hotel_owner' %}
+        <div class="mt-2"><span class="badge-ls badge-{% if user.profile.owner_approval_status == 'approved' %}ok{% elif user.profile.owner_approval_status == 'pending' %}warn{% else %}bad{% endif %}">{{ user.profile.get_owner_approval_status_display }}</span></div>
+        {% endif %}
+      </div>
+      <div class="ls-panel p-3">
+        <div style="font-size:.65rem;letter-spacing:3px;text-transform:uppercase;color:var(--ink-3);padding:.5rem .75rem;border-bottom:1px solid rgba(255,255,255,.06);margin-bottom:.5rem;">Quick Links</div>
+        <a href="{% url 'my_bookings' %}" style="display:flex;align-items:center;gap:.6rem;padding:.6rem .75rem;color:var(--ink-3);font-size:.84rem;border-radius:var(--r1);transition:background .15s,color .15s;" onmouseover="this.style.background='var(--gold-bg)';this.style.color='var(--gold)'" onmouseout="this.style.background='';this.style.color='var(--ink-3)'"><i class="bi bi-calendar-check"></i>My Bookings</a>
+        {% if user.profile.is_hotel_owner %}<a href="{% url 'hotel_dashboard' %}" style="display:flex;align-items:center;gap:.6rem;padding:.6rem .75rem;color:var(--ink-3);font-size:.84rem;border-radius:var(--r1);transition:background .15s,color .15s;" onmouseover="this.style.background='var(--gold-bg)';this.style.color='var(--gold)'" onmouseout="this.style.background='';this.style.color='var(--ink-3)'"><i class="bi bi-building"></i>My Hotels</a>{% endif %}
+      </div>
+    </div>
+    <div class="col-lg-7">
+      <form method="post" enctype="multipart/form-data">
+        {% csrf_token %}
+        <div class="form-section">
+          <div class="form-section-title"><i class="bi bi-person"></i>Personal Information</div>
+          <div class="row g-3">
+            <div class="col-md-6"><label class="form-label">First Name</label>{{ form.first_name }}</div>
+            <div class="col-md-6"><label class="form-label">Last Name</label>{{ form.last_name }}</div>
+            <div class="col-md-6"><label class="form-label">Phone</label>{{ form.phone }}</div>
+            <div class="col-md-6"><label class="form-label">Date of Birth</label>{{ form.date_of_birth }}</div>
+            <div class="col-12"><label class="form-label">Bio</label>{{ form.bio }}</div>
+          </div>
+        </div>
+        <div class="form-section">
+          <div class="form-section-title"><i class="bi bi-geo-alt"></i>Location</div>
+          <div class="row g-3">
+            <div class="col-12"><label class="form-label">Address</label>{{ form.address }}</div>
+            <div class="col-md-6"><label class="form-label">City</label>{{ form.city }}</div>
+            <div class="col-md-6"><label class="form-label">Country</label>{{ form.country }}</div>
+          </div>
+        </div>
+        {% if form.errors %}
+        <div class="alert alert-danger">{% for f,errs in form.errors.items %}{% for e in errs %}{{ e }}<br>{% endfor %}{% endfor %}</div>
+        {% endif %}
+        <button type="submit" class="btn-ls btn-gold" style="padding:.85rem 2.5rem;"><i class="bi bi-check-lg me-2"></i>Save Changes</button>
+      </form>
+    </div>
+  </div>
+</div>
+{% endblock %}

@@ -1,0 +1,211 @@
+{% extends 'base.html' %}
+{% block title %}LuxeStay — Discover Extraordinary Hotels{% endblock %}
+{% block content %}
+
+<!-- HERO -->
+<section class="hero">
+  <div class="hero-bg"></div>
+  <div class="hero-vignette"></div>
+  <div class="container position-relative" style="z-index:2;">
+    <div class="row align-items-center g-5">
+      <div class="col-lg-6">
+        <div class="hero-content">
+          <p class="eyebrow hero-eyebrow"><i class="bi bi-star-fill me-2"></i>Finest Hotels In Munnar</p>
+          <hr class="hero-line">
+          <h1 class="hero-title">Find Your<br><span class="accent">Perfect Stay</span><br>Anywhere</h1>
+          <p class="hero-sub mt-4">Discover handpicked luxury hotels and boutique retreats. Every booking crafted for the discerning traveller.</p>
+          <div class="hero-actions d-flex gap-3 mt-4">
+            <a href="{% url 'hotel_list' %}" class="btn-ls btn-gold lg">Explore Hotels</a>
+            {% if not user.is_authenticated %}
+            <a href="{% url 'register' %}" class="btn-ls btn-ghost lg">Join Free</a>
+            {% endif %}
+          </div>
+        </div>
+      </div>
+      <div class="col-lg-6">
+        <div class="search-panel">
+          <p class="search-panel-title"><i class="bi bi-search me-2 text-gold"></i>Search Hotels</p>
+          <form action="{% url 'hotel_list' %}" method="get">
+            <div class="row g-3">
+              <div class="col-12">
+                <label class="form-label">Destination or Hotel</label>
+                <div class="input-group">
+                  <span class="input-group-text"><i class="bi bi-geo-alt"></i></span>
+                  <input type="text" name="query" class="form-control" placeholder="Where are you going?">
+                </div>
+              </div>
+              <div class="col-6">
+                <label class="form-label">Check In</label>
+                <input type="date" name="check_in" class="form-control">
+              </div>
+              <div class="col-6">
+                <label class="form-label">Check Out</label>
+                <input type="date" name="check_out" class="form-control">
+              </div>
+              <div class="col-6">
+                <label class="form-label">Guests</label>
+                <input type="number" name="guests" class="form-control" value="2" min="1">
+              </div>
+              <div class="col-6">
+                <label class="form-label">Stars</label>
+                <select name="stars" class="form-select">
+                  <option value="">Any Rating</option>
+                  {% for i in "12345" %}<option value="{{ i }}">{{ i }} Stars</option>{% endfor %}
+                </select>
+              </div>
+              <div class="col-12 mt-1">
+                <button type="submit" class="btn-ls btn-gold w-full" style="padding:.85rem;">
+                  <i class="bi bi-search me-2"></i>Search Available Hotels
+                </button>
+              </div>
+            </div>
+          </form>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- STATS -->
+<div class="stats-strip">
+  <div class="container">
+    <div class="row text-center g-3">
+      <div class="col-6 col-md-3"><div class="stat-block"><span class="stat-num">{{ total_hotels }}+</span><span class="stat-lbl">Hotels Listed</span></div></div>
+      <div class="col-6 col-md-3"><div class="stat-block"><span class="stat-num">50+</span><span class="stat-lbl">Destinations</span></div></div>
+      <div class="col-6 col-md-3"><div class="stat-block"><span class="stat-num">10K+</span><span class="stat-lbl">Happy Guests</span></div></div>
+      <div class="col-6 col-md-3"><div class="stat-block"><span class="stat-num">4.9</span><span class="stat-lbl">Avg Rating</span></div></div>
+    </div>
+  </div>
+</div>
+
+<!-- FEATURED -->
+{% if featured_hotels %}
+<section class="section-pad" style="background:var(--bg1);">
+  <div class="container">
+    <div class="text-center mb-5">
+      <p class="eyebrow">Hand-picked for You</p>
+      <h2>Featured Hotels</h2>
+      <hr class="gold-rule c">
+    </div>
+    <div class="row g-4">
+      {% for hotel in featured_hotels %}
+      <div class="col-lg-4 col-md-6">
+        <a href="{% url 'hotel_detail' hotel.slug %}" class="hotel-card">
+          <div class="hotel-card-img-wrap">
+            {% with hotel.get_main_image as img %}
+            <img class="hotel-card-img" src="{% if img %}{{ img.image.url }}{% else %}https://images.unsplash.com/photo-1566073771259-6a8506099945?w=600&q=80{% endif %}" alt="{{ hotel.name }}">
+            {% endwith %}
+            <div class="hotel-card-scrim"></div>
+            <div style="position:absolute;top:12px;left:12px;"><span class="badge-ls badge-gold">Featured</span></div>
+          </div>
+          <div class="hotel-card-body">
+            <div class="hotel-stars mb-1">{% for i in "12345" %}{% if forloop.counter <= hotel.stars %}★{% endif %}{% endfor %}</div>
+            <div class="hotel-card-name">{{ hotel.name }}</div>
+            <div class="hotel-card-loc mt-1 mb-3"><i class="bi bi-geo-alt"></i>{{ hotel.city }}, {{ hotel.country }}</div>
+            <p class="footer-text line-clamp-2 mb-3" style="font-size:.83rem;">{{ hotel.short_description }}</p>
+            <div class="d-flex justify-content-between align-items-end">
+              {% if hotel.get_min_price %}
+              <div><div class="hotel-price-label">From</div><div class="hotel-price">${{ hotel.get_min_price }}<span style="font-size:1rem;color:var(--ink-3);font-family:'Outfit',sans-serif;font-weight:300;">/night</span></div></div>
+              {% else %}<div></div>{% endif %}
+              <span class="btn-ls btn-ghost sm">View →</span>
+            </div>
+          </div>
+        </a>
+      </div>
+      {% endfor %}
+    </div>
+    <div class="text-center mt-5">
+      <a href="{% url 'hotel_list' %}" class="btn-ls btn-gold lg">View All Hotels</a>
+    </div>
+  </div>
+</section>
+{% endif %}
+
+<!-- WHY US -->
+<div class="feature-wrap">
+  <div class="container">
+    <div class="text-center mb-5">
+      <p class="eyebrow">Why LuxeStay</p>
+      <h2>Travel with Confidence</h2>
+      <hr class="gold-rule c">
+    </div>
+    <div class="row g-4">
+      <div class="col-md-3 col-6">
+        <div class="feature-item">
+          <div class="feature-icon-ring"><i class="bi bi-shield-check"></i></div>
+          <div class="feature-name">Secure Booking</div>
+          <p class="feature-desc">SSL encrypted payments and 100% secure transactions every time.</p>
+        </div>
+      </div>
+      <div class="col-md-3 col-6">
+        <div class="feature-item">
+          <div class="feature-icon-ring"><i class="bi bi-award"></i></div>
+          <div class="feature-name">Curated Quality</div>
+          <p class="feature-desc">Every hotel is verified and reviewed by our expert concierge team.</p>
+        </div>
+      </div>
+      <div class="col-md-3 col-6">
+        <div class="feature-item">
+          <div class="feature-icon-ring"><i class="bi bi-headset"></i></div>
+          <div class="feature-name">24/7 Support</div>
+          <p class="feature-desc">Our global concierge team is always available to assist you.</p>
+        </div>
+      </div>
+      <div class="col-md-3 col-6">
+        <div class="feature-item">
+          <div class="feature-icon-ring"><i class="bi bi-arrow-counterclockwise"></i></div>
+          <div class="feature-name">Free Cancellation</div>
+          <p class="feature-desc">Flexible cancellation policies on most of our hotel listings.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ALL HOTELS -->
+{% if all_hotels %}
+<section class="section-pad" style="background:var(--bg1);">
+  <div class="container">
+    <div class="d-flex justify-content-between align-items-center mb-4 flex-wrap gap-3">
+      <div><p class="eyebrow mb-1">Explore</p><h2 class="mb-0">All Hotels</h2></div>
+      <a href="{% url 'hotel_list' %}" class="btn-ls btn-ghost sm">See All →</a>
+    </div>
+    <div class="row g-4">
+      {% for hotel in all_hotels %}
+      <div class="col-lg-3 col-md-6 col-6">
+        <a href="{% url 'hotel_detail' hotel.slug %}" class="hotel-card">
+          <div class="hotel-card-img-wrap">
+            {% with hotel.get_main_image as img %}
+            <img class="hotel-card-img" style="height:180px;" src="{% if img %}{{ img.image.url }}{% else %}https://images.unsplash.com/photo-1571003123894-1f0594d2b5d9?w=400&q=80{% endif %}" alt="{{ hotel.name }}">
+            {% endwith %}
+            <div class="hotel-card-scrim"></div>
+          </div>
+          <div class="hotel-card-body">
+            <div class="hotel-stars mb-1" style="font-size:.65rem;">{% for i in "12345" %}{% if forloop.counter <= hotel.stars %}★{% endif %}{% endfor %}</div>
+            <div class="hotel-card-name" style="font-size:1.05rem;">{{ hotel.name }}</div>
+            <div class="hotel-card-loc" style="font-size:.74rem;"><i class="bi bi-geo-alt"></i>{{ hotel.city }}</div>
+            {% if hotel.get_min_price %}<div class="text-gold" style="font-family:'Cormorant Garamond',serif;font-size:1.25rem;font-weight:700;margin-top:.5rem;">${{ hotel.get_min_price }}<span style="font-size:.8rem;color:var(--ink-3);font-family:'Outfit',sans-serif;">/night</span></div>{% endif %}
+          </div>
+        </a>
+      </div>
+      {% endfor %}
+    </div>
+  </div>
+</section>
+{% endif %}
+
+<!-- CTA -->
+<section class="cta-section">
+  <div class="container text-center" style="position:relative;z-index:2;">
+    <p class="eyebrow">Hotel Owners</p>
+    <h2 style="color:var(--ink);" class="mb-3">List Your Property Today</h2>
+    <hr class="gold-rule c">
+    <p style="color:var(--ink-3);max-width:480px;margin:1rem auto 2rem;">Join thousands of hotels reaching millions of discerning travellers worldwide.</p>
+    {% if not user.is_authenticated %}
+    <a href="{% url 'register' %}" class="btn-ls btn-gold lg">Get Started Free</a>
+    {% elif user.profile.role == 'hotel_owner' %}
+    <a href="{% url 'hotel_create' %}" class="btn-ls btn-gold lg">Add Your Hotel</a>
+    {% endif %}
+  </div>
+</section>
+{% endblock %}

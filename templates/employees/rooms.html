@@ -1,0 +1,32 @@
+{% extends 'employees/base.html' %}
+{% block title %}Rooms{% endblock %}
+{% block topbar_title %}Rooms{% endblock %}
+{% block nav_rooms %}active{% endblock %}
+{% block content %}
+<div class="sp-page-head">
+  <div><h2>Rooms</h2><p>{{ hotel.name }} · {{ rooms.count }} room{{ rooms.count|pluralize }}</p></div>
+  {% if emp.can_manage_rooms %}<a href="{% url 'room_create' hotel.slug %}" class="sp-btn sb-primary"><i class="bi bi-plus-lg"></i>Add Room</a>{% endif %}
+</div>
+<div class="sp-table-wrap">
+  <table class="sp-table">
+    <thead><tr><th>Room</th><th>Type</th><th>Capacity</th><th>Price/Night</th><th>Bed</th><th>Status</th>{% if emp.can_manage_rooms %}<th></th>{% endif %}</tr></thead>
+    <tbody>
+      {% for room in rooms %}
+      <tr>
+        <td><div style="font-weight:500;color:var(--ink);">{{ room.name }}</div><div style="font-size:.7rem;color:var(--ink3);">Room {{ room.room_number }}</div></td>
+        <td style="font-size:.8rem;">{{ room.room_type }}</td>
+        <td style="text-align:center;">{{ room.capacity }}</td>
+        <td style="color:var(--gold);font-weight:600;">${{ room.price_per_night }}</td>
+        <td style="font-size:.78rem;color:var(--ink3);">{{ room.bed_type|default:"—" }}</td>
+        <td><span class="sp-badge {% if room.is_available %}sb-ok{% else %}sb-bad{% endif %}">{% if room.is_available %}Available{% else %}Unavailable{% endif %}</span></td>
+        {% if emp.can_manage_rooms %}
+        <td><a href="{% url 'room_edit' room.pk %}" class="sp-btn sb-ghost" style="padding:.28rem .55rem;font-size:.68rem;"><i class="bi bi-pencil"></i></a></td>
+        {% endif %}
+      </tr>
+      {% empty %}
+      <tr><td colspan="7" style="text-align:center;padding:3rem;color:var(--ink3);">No rooms found</td></tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>
+{% endblock %}

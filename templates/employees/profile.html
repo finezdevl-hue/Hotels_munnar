@@ -1,0 +1,29 @@
+{% extends 'employees/base.html' %}
+{% block title %}My Profile{% endblock %}
+{% block topbar_title %}My Profile{% endblock %}
+{% block nav_profile %}active{% endblock %}
+{% block content %}
+<div class="sp-page-head"><h2>My Profile</h2></div>
+<div class="row g-3 justify-content-center">
+  <div class="col-lg-5">
+    <div class="sp-panel sp-panel-gold sp-panel-body mb-3" style="text-align:center;">
+      <div style="width:68px;height:68px;border-radius:50%;background:var(--gold-bg);border:2px solid var(--gold-bd);display:flex;align-items:center;justify-content:center;margin:0 auto .75rem;font-family:'Cormorant Garamond',serif;font-size:1.8rem;color:var(--gold);">{{ request.user.first_name.0|default:request.user.username.0|upper }}</div>
+      <div style="font-family:'Cormorant Garamond',serif;font-size:1.1rem;color:var(--ink);">{{ request.user.get_full_name|default:request.user.username }}</div>
+      <div style="font-size:.72rem;color:var(--ink3);margin:.2rem 0 .75rem;">@{{ request.user.username }}</div>
+      <span class="sp-badge sb-gold">{{ emp.job_title }}</span>
+      <div style="margin-top:1rem;padding-top:.75rem;border-top:1px solid rgba(255,255,255,.05);font-size:.8rem;color:var(--ink3);">Hotel: <span style="color:var(--gold);">{{ hotel.name }}</span></div>
+    </div>
+    <form method="post">
+      {% csrf_token %}
+      <div class="sp-panel sp-panel-gold sp-panel-body">
+        <div class="sp-panel-title"><i class="bi bi-person"></i>Update Details</div>
+        <div style="margin-bottom:.85rem;"><label class="sp-label">First Name</label><input type="text" name="first_name" value="{{ request.user.first_name }}" class="sp-input"></div>
+        <div style="margin-bottom:.85rem;"><label class="sp-label">Last Name</label><input type="text" name="last_name" value="{{ request.user.last_name }}" class="sp-input"></div>
+        <div style="margin-bottom:.85rem;"><label class="sp-label">Email</label><input type="email" name="email" value="{{ request.user.email }}" class="sp-input"></div>
+        <div style="margin-bottom:1.25rem;"><label class="sp-label">New Password <span style="color:var(--ink3);text-transform:none;letter-spacing:0;font-weight:400;">(leave blank to keep current)</span></label><input type="password" name="new_password" class="sp-input" placeholder="Enter new password…"></div>
+        <button type="submit" class="sp-btn sb-primary" style="width:100%;justify-content:center;"><i class="bi bi-check-lg me-1"></i>Save Changes</button>
+      </div>
+    </form>
+  </div>
+</div>
+{% endblock %}
