@@ -4,10 +4,10 @@ echo "==== Install requirements ===="
 pip install -r requirements.txt
 
 echo "==== Run migrations ===="
-python manage.py migrate
+python manage.py migrate --noinput
 
 echo "==== Collect static ===="
-python manage.py collectstatic --noinput
+python manage.py collectstatic --noinput --clear
 
 echo "==== Create superuser ===="
 python manage.py shell <<EOF
